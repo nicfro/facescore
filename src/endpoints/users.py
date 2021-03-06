@@ -97,6 +97,7 @@ def post_one_user(user: UserCreate, db: Session = Depends(DBC.get_session)):
     db.add(user_model)
     db.commit()
     db.refresh(user_model)
+    return {"message": f"user with created with id: {user_model.id}"}
 
 
 @router.put("/users", response_model=UserSchema)
@@ -148,6 +149,6 @@ def delete_one_user_by_id(user_id: str, db: Session = Depends(DBC.get_session)):
             raise sqlalchemy.orm.exc.NoResultFound
         # Commit to DB
         db.commit()
-        return {"id": user.id}
+        return {"id": user_id}
     except sqlalchemy.orm.exc.NoResultFound:
         raise Exception(f"{user_id} does not exist")
