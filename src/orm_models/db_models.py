@@ -1,8 +1,6 @@
-import uuid
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy import Column, VARCHAR, TIMESTAMP, ForeignKey, Float, Integer, TIME, PrimaryKeyConstraint, Binary, Date
+from sqlalchemy import Column, VARCHAR, TIMESTAMP, ForeignKey, Integer, PrimaryKeyConstraint, VARBINARY, Date
 from sqlalchemy.sql import func
-from sqlalchemy.dialects.mssql import DATETIMEOFFSET
 
 BaseModel = declarative_base()
 
@@ -19,7 +17,7 @@ class UserModel(BaseModel):
     email = Column(VARCHAR, unique=True, index=True)
     gender = Column(VARCHAR, index=True)
     country = Column(VARCHAR, index=True)
-    birthdate= Column(Date, unique=True, index=True)
+    birthdate = Column(Date, unique=True, index=True)
     hashed_password = Column(VARCHAR, unique=True, index=True)
     salt = Column(VARCHAR, unique=True, index=True)
     PrimaryKeyConstraint(id, name="PK_users_id")
@@ -35,7 +33,7 @@ class ImageModel(BaseModel):
     id = Column(Integer, unique=True, primary_key=True, autoincrement=True)
     user_id = Column(Integer, unique=True)
     created_at = Column(TIMESTAMP, default=func.now())
-    file = Column(Binary())
+    file = Column(VARBINARY)
 
     PrimaryKeyConstraint(id, name="PK_images_id")
 
