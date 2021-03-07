@@ -20,6 +20,7 @@ class UserModel(BaseModel):
     birthdate = Column(Date, unique=True, index=True)
     hashed_password = Column(VARCHAR, unique=True, index=True)
     salt = Column(VARCHAR, unique=True, index=True)
+    created_at = Column(TIMESTAMP, default=func.now())
     PrimaryKeyConstraint(id, name="PK_users_id")
 
 
@@ -49,7 +50,8 @@ class VoteModel(BaseModel):
     user_id = Column(ForeignKey("users.id", name="FK_votes_user_id_users_id"))
     left_image_id = Column(ForeignKey("images.id", name="FK_votes_left_image_id_images_id"))
     right_image_id = Column(ForeignKey("images.id", name="FK_votes_right_image_id_images_id"))
-    file = Column(Binary())
+    winner = Column(ForeignKey("images.id", name="FK_votes_winner_image_id_images_id"))
+    created_at = Column(TIMESTAMP, default=func.now())
 
     PrimaryKeyConstraint(id, name="PK_votes_id")
 

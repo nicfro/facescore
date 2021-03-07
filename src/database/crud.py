@@ -15,7 +15,7 @@ def create(model):
 def read(model, field, search_value):
     try:
         session = DBC.get_session()
-        result = db.query(AnnotatorModel).filter(AnnotatorModel.field == search_value).one()
+        result = session.query(model).filter(model.field == search_value).one()
         return result
     except Exception as err:
         logger.error(f"{err}")

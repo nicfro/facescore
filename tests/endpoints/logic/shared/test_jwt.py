@@ -4,7 +4,7 @@ import time
 sys.path.insert(0, os.getcwd())
 
 import unittest
-from src.logic.shared_logic.jwt_handler import *
+from src.logic.jwt_handler import encode_auth_token, decode_auth_token
 from src.utils.common_logger import logger
 
 
@@ -17,37 +17,28 @@ class TestJwt(unittest.TestCase):
         test_duration = 94871
 
         token = encode_auth_token(test_user_id, test_duration)
-        print(type(token))
         self.assertTrue(isinstance(token,str))
 
     def test_02_deode_valid_auth_token(self):
         test_user_id = "test_user"
-        test_duration = 1000
+        test_duration = 100000
 
         token = encode_auth_token(test_user_id, test_duration)
         decoded = decode_auth_token(token)
 
-        self.assertTrue(isinstance(decoded, int))
+        self.assertTrue(decoded == test_user_id)
 
-    def test_03_decode_invalid_auth_token(self):
+    def test_03_decode_expired_auth_token(self):
         test_user_id = "test_user"
-        test_duration = 0
+        test_duration = 0.5
 
         token = encode_auth_token(test_user_id, test_duration)
+        time.sleep(2)
         decoded = decode_auth_token(token)
 
-        self.assertTrue(isinstance(decoded, str))
 
-    def test_04_expired_auth_token(self):
-        test_user_id = "test_user"
-        test_duration = 1
+        self.assertTrue(decoded == "Signature expired. Please log in again.")
 
-        token = encode_auth_token(test_user_id, test_duration)
-        decoded_valid = decode_auth_token(token)
-
-        time.sleep(1.5)
-
-        decoded_invalid = decode_auth_token(token)
-
-        self.assertTrue(isinstance(decoded_valid, int))
-        self.assertTrue(isinstance(decoded_invalid, str))
+    def test_04_decode_invalid_auth_token(self):
+        decoded = decode_auth_token("totallywrongtoken")
+        self.assertTrue(decoded == "Invalid token. Please log in again.")

@@ -14,7 +14,7 @@ router = APIRouter()
 
 
 @router.get("/login/{user_id}")
-def login_user_by_id(user_id: str, user_password: str, db: Session = Depends(DBC.get_session)):
+def login_user_by_id(user_name: str, user_password: str, db: Session = Depends(DBC.get_session)):
     """
     GET login token for user
     :param user_id: User ID to log in
@@ -22,11 +22,12 @@ def login_user_by_id(user_id: str, user_password: str, db: Session = Depends(DBC
     :return: Retrieved login token
     """
     try:
-        user = db.query(UserModel).filter(UserModel.id == user_id).one()
+        user = db.query(UserModel).filter(UserModel.name == user_name).one()
         if hasher.verify(user_password, user.salt, str(user.hashed_password)):
-            return {"jwt_token": encode_auth_token(user.id, 1000)}
+            token = encode_auth_token(user.id, 1000)
+            return {"jwt_token": token}
         else:
-            return {"jwt_token": None}
+            return {"jwt_token": "wrong password"}
 
     except sqlalchemy.orm.exc.NoResultFound:
-        raise Exception(f"{user_id} does not exist")
+        raise Exception(f"{user_name} does not exist")

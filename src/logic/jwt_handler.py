@@ -3,7 +3,6 @@ import datetime
 import os
 import time
 
-
 def duration_to_timedelta(duration):
     """
     Compute duration (in seconds) to days, hours, minutes, and seconds.
@@ -33,10 +32,8 @@ def encode_auth_token(user_id, duration):
     Generates the Auth Token
     :return: string
     """
-
     #convert duration into days, hours, minutes, seconds
     days, hours, minutes, seconds = duration_to_timedelta(duration)
-
     try:
         payload = {
             'exp': datetime.datetime.utcnow() + datetime.timedelta(days=days, hours=hours, minutes=minutes, seconds=seconds),
@@ -45,7 +42,7 @@ def encode_auth_token(user_id, duration):
         }
         return jwt.encode(
             payload,
-            os.environ["JWT_SECRET"],
+            "KEY",
             algorithm='HS256'
         )
     except Exception as e:
@@ -59,7 +56,7 @@ def decode_auth_token(auth_token):
     :return: integer|string
     """
     try:
-        payload = jwt.decode(auth_token, os.environ["JWT_SECRET"])
+        payload = jwt.decode(auth_token, "KEY", algorithms=["HS256"])
         return payload['sub']
     except jwt.ExpiredSignatureError:
         return 'Signature expired. Please log in again.'
@@ -77,4 +74,3 @@ def decode_auth_token_decorator(auth_token):
             return func(*args, **kwargs)
         return wrapped_func
     return decorator
-    
