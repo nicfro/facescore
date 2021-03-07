@@ -12,7 +12,7 @@ import base64
 router = APIRouter()
 #, file: UploadFile = File(...)
 @router.post("/images")
-async def post_image(user_id: str = Form(...), file: UploadFile = File(...), db: Session = Depends(DBC.get_session)):
+async def post_image(user_id: int = Form(...), file: UploadFile = File(...), db: Session = Depends(DBC.get_session)):
     """
     POST one image
     Gets user_id from form and file as an UploadFile object
@@ -33,7 +33,7 @@ async def post_image(user_id: str = Form(...), file: UploadFile = File(...), db:
 
 
 @router.get("/images/id/{image_id}", response_model=ImageSchema)
-async def get_image_by_id(image_id: str, db: Session = Depends(DBC.get_session)):
+async def get_image_by_id(image_id: int, db: Session = Depends(DBC.get_session)):
     """
     GET one image 
     Get image_id from form

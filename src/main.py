@@ -6,7 +6,7 @@ import uvicorn
 from fastapi import FastAPI
 from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
-from src.endpoints import docs, users, login, vote, image
+from src.endpoints import docs, users, login, vote, image, elo
 from src.utils.common_logger import logger
 
 
@@ -27,6 +27,7 @@ app.include_router(users.router)
 app.include_router(login.router)
 app.include_router(vote.router)
 app.include_router(image.router)
+app.include_router(elo.router)
 
 app.add_middleware(
     CORSMiddleware,
