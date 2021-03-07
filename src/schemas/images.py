@@ -10,7 +10,6 @@ class ImageSchema(BaseModel):
     """
     id: int
     user_id: int
-    created_at: datetime.datetime
     file: bytearray
 
     class Config:
@@ -21,7 +20,6 @@ class ImageCreate(BaseModel):
     Fields information needed for POST
     """
     user_id: int
-    created_at: Optional[datetime.datetime]
     file: bytearray 
 
 
