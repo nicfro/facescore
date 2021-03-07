@@ -5,10 +5,8 @@ from fastapi import Depends, APIRouter
 from ..schemas.votes import VoteSchema, VoteCreate, VoteDelete, VoteUpdate
 from ..orm_models.db_models import VoteModel
 from . import DBC
-from src.logic.hasher import Hasher
 
 
-hasher = Hasher()
 router = APIRouter()
 
 

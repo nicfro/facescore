@@ -22,6 +22,7 @@ class ImageCreate(BaseModel):
     """
     user_id: int
     created_at: Optional[datetime.datetime]
+    file: bytearray 
 
 
 class ImageUpdate(BaseModel):
