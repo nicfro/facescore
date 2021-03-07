@@ -4,7 +4,7 @@ import sys
 sys.path.insert(0, os.getcwd())
 
 import unittest
-from src.logic.shared_logic.hasher import Hasher
+from src.logic.hasher import Hasher
 from src.utils.common_logger import logger
 
 
