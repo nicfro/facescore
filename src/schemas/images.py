@@ -20,16 +20,16 @@ class ImageCreate(BaseModel):
     Fields information needed for POST
     """
     user_id: int
-    file: bytes 
+    file: Optional[bytes]
 
 
 class ImageUpdate(BaseModel):
     """
     Fields information needed for Update
     """
-    id: int
-    user_id: int
-    file: bytes
+    id: Optional[int]
+    user_id: Optional[int]
+    file: Optional[bytes]
 
 
 class UserDelete(BaseModel):

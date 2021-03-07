@@ -97,7 +97,7 @@ def post_one_user(user: UserCreate, db: Session = Depends(DBC.get_session)):
     db.add(user_model)
     db.commit()
     db.refresh(user_model)
-    return {"message": f"user with created with id: {user_model.id}"}
+    return {"message": f"user created with id: {user_model.id}"}
 
 
 @router.put("/users", response_model=UserSchema)
