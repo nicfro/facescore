@@ -17,9 +17,9 @@ def post_one_image(image: ImageCreate, db: Session = Depends(DBC.get_session)):
     """
     POST one image
     It reads parameters from the request field and add missing fields from default values defined in the model
-    :param user: UserBase class that contains all columns in the table
+    :param user: ImageBase class that contains all columns in the table
     :param db: DB session
-    :return: Created user entry
+    :return: Created image entry
     """
     image_args = image.dict()
     image_model = ImageModel(**image_args)
