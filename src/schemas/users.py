@@ -17,7 +17,7 @@ class UserSchema(BaseModel):
     hashed_password: str
     birthdate: date
     salt: str
-    created_at: datetime.datetime
+    created_at: datetime
 
     class Config:
         orm_mode = True

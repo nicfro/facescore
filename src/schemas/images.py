@@ -11,7 +11,7 @@ class ImageSchema(BaseModel):
     id: int
     user_id: int
     file: bytearray
-    created_at: datetime.datetime
+    created_at: datetime
     class Config:
         orm_mode = True
 

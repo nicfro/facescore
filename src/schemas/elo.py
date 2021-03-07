@@ -11,7 +11,7 @@ class EloSchema(BaseModel):
     id: int
     image_id: int
     score: int
-    created_at: datetime.datetime
+    created_at: datetime
     class Config:
         orm_mode = True
 
