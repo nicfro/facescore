@@ -11,6 +11,7 @@ class EloSchema(BaseModel):
     id: int
     image_id: int
     score: int
+    created_at: datetime.datetime
     class Config:
         orm_mode = True
 
@@ -28,8 +29,8 @@ class UserUpdate(BaseModel):
     Fields information needed for Update
     """
     id: int
-    image_id: int
-    score: int
+    image_id: Optional[int]
+    score: Optional[int]
 
 
 

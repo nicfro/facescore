@@ -13,6 +13,7 @@ class VoteSchema(BaseModel):
     left_image_id: int
     right_image_id: int
     winner: int
+    created_at: datetime.datetime
 
     class Config:
         orm_mode = True

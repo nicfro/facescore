@@ -1,5 +1,6 @@
 from pydantic import BaseModel
 from typing import Optional
+from datetime import datetime
 from datetime import date
 
 
@@ -16,6 +17,7 @@ class UserSchema(BaseModel):
     hashed_password: str
     birthdate: date
     salt: str
+    created_at: datetime.datetime
 
     class Config:
         orm_mode = True
@@ -41,7 +43,7 @@ class UserUpdate(BaseModel):
     gender: Optional[str]
     country: Optional[str]
     birthdate: Optional[date]
-    salt: str
+    salt: Optional[str]
 
 
 class UserDelete(BaseModel):
