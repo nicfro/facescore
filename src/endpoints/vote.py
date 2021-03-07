@@ -96,6 +96,6 @@ def delete_one_vote_by_id(vote_id: str, db: Session = Depends(DBC.get_session)):
             raise sqlalchemy.orm.exc.NoResultFound
         # Commit to DB
         db.commit()
-        return {"id": vote.id}
+        return {"id": vote_id}
     except sqlalchemy.orm.exc.NoResultFound:
         raise Exception(f"{vote_id} does not exist")
