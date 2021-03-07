@@ -51,7 +51,7 @@ class VoteModel(BaseModel):
     user_id = Column(ForeignKey("users.id", name="FK_votes_user_id_users_id"))
     left_image_id = Column(ForeignKey("images.id", name="FK_votes_left_image_id_images_id"))
     right_image_id = Column(ForeignKey("images.id", name="FK_votes_right_image_id_images_id"))
-    file = Column(Binary())
+    winner = Column(ForeignKey("images.id", name="FK_votes_winner_image_id_images_id"))
 
     PrimaryKeyConstraint(id, name="PK_votes_id")
 

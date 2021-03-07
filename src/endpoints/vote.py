@@ -17,16 +17,18 @@ def get_all_votes(db: Session = Depends(DBC.get_session)):
     """
     GET all votes
     :param db: DB session
-    :return: ALl vote entries
+    :return: All vote entries
     """
+    votes = db.query(VoteModel).all()
     return [{"id": vote.id,
              "user_id": vote.user_id,
              "left_image_id": vote.left_image_id, 
-             "right_image_id": vote.right_image_id} for vote in db.query(VoteModel).all()]
+             "right_image_id": vote.right_image_id,
+             "result": vote.result} for vote in votes]
 
 
 @router.get("/votes/user/{user_id}", response_model=VoteSchema)
-def get_one_vote_by_user_id(user_id: str, db: Session = Depends(DBC.get_session)):
+def get_votes_by_user_id(user_id: str, db: Session = Depends(DBC.get_session)):
     """
     GET one vote by name
     :param vote_name: Vote name to get
@@ -35,17 +37,20 @@ def get_one_vote_by_user_id(user_id: str, db: Session = Depends(DBC.get_session)
     """
     try:
         # Get vote by name
-        vote = db.query(VoteModel).filter(VoteModel.user_id == user_id).all()
-        return {"id": vote.id,
-                "user_id": vote.user_id,
-                "left_image_id": vote.left_image_id, 
-                "right_image_id": vote.right_image_id}
+        votes = db.query(VoteModel).filter(VoteModel.user_id == user_id).all()
+
+        return [{"id": vote.id,
+                 "user_id": vote.user_id,
+                 "left_image_id": vote.left_image_id, 
+                 "right_image_id": vote.right_image_id,
+                 "result": vote.result} for vote in votes]
+
     except sqlalchemy.orm.exc.NoResultFound:
         raise Exception(f"User {user_id} does not exist")
 
 
 @router.get("/votes/id/{vote_id}", response_model=VoteSchema)
-def get_one_vote_by_id(vote_id: str, db: Session = Depends(DBC.get_session)):
+def get_vote_by_id(vote_id: str, db: Session = Depends(DBC.get_session)):
     """
     GET one vote by ID
     :param vote_id: Vote ID to get
@@ -73,6 +78,9 @@ def post_one_vote(vote: VoteCreate, db: Session = Depends(DBC.get_session)):
     :return: Created vote entry
     """
     vote_to_create = VoteModel(**vote.dict())
+    # place the vote
+    # calculate new elos
+    # update elos
 
     # Commit to DB
     db.add(vote_to_create)

@@ -12,7 +12,7 @@ class VoteSchema(BaseModel):
     user_id: int
     left_image_id: int
     right_image_id: int
-    result: str
+    winner: int
 
     class Config:
         orm_mode = True
@@ -24,7 +24,7 @@ class VoteCreate(BaseModel):
     user_id: int
     left_image_id: int
     right_image_id: int
-    result: str
+    winner: int
 
 class VoteUpdate(BaseModel):
     """
@@ -34,7 +34,7 @@ class VoteUpdate(BaseModel):
     user_id: Optional[int]
     left_image_id: Optional[int]
     right_image_id: Optional[int]
-    result: Optional[str]
+    winner: Optional[int]
 
 
 class VoteDelete(BaseModel):
