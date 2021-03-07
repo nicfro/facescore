@@ -13,7 +13,7 @@ router = APIRouter()
 
 
 @router.post("/images", response_model=ImageSchema)
-def post_one_user(image: ImageCreate, db: Session = Depends(DBC.get_session)):
+def post_one_image(image: ImageCreate, db: Session = Depends(DBC.get_session)):
     """
     POST one image
     It reads parameters from the request field and add missing fields from default values defined in the model
