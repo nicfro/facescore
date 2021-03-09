@@ -40,7 +40,6 @@ def post_elo_score(elo: EloCreate, db: Session = Depends(DBC.get_session)):
     :return: Created user entry
     """
     elo_args = elo.dict()
-    # Create hashed passwordxw
     elo_model = EloModel(**elo_args)
 
     # Commit to DB
