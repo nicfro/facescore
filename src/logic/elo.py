@@ -1,13 +1,19 @@
+from src.endpoints.elo import get_elo_by_image_id
+from src.endpoints import DBC
+from trueskill import rate_1vs1, Rating
+
+
 def calculateElo(winner, loser):
-    '''https://www.omnicalculator.com/sports/elo'''
-    winner = getEloScore(winner)[0]
-    loser = getEloScore(loser)[0]
-    EA = (1 / (1 + 10**((loser - winner)/400)))
-    EB = (1 / (1 + 10**((winner - loser)/400)))
+    """https://trueskill.org/"""
+    winner = get_elo_by_image_id(winner, DBC.Session())
+    loser = get_elo_by_image_id(loser, DBC.Session())
     
-    winner = winner + 30 * (0.5 - EA)
-    loser = loser + 30 * (0.5 - EB)
+    winner_prev_trueskill = Rating(mu = winner["mu"], sigma = winner["sigma"])  
+    loser_prev_trueskill = Rating(mu = loser["mu"], sigma = loser["sigma"])  
+
+    winner_trueskill, loser_trueskill = rate_1vs1(winner_prev_trueskill, loser_prev_trueskill)
     
-    return winner, loser
-
-
+    return {"winner_mu": winner_trueskill.mu,
+            "winner_sigma": winner_trueskill.sigma,
+            "loser_mu": loser_trueskill.mu,
+            "loser_sigma": loser_trueskill.sigma,}

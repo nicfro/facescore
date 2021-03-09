@@ -23,7 +23,8 @@ def get_elo_by_image_id(image_id: int, db: Session = Depends(DBC.get_session)):
         elo = db.query(EloModel).filter(EloModel.image_id == image_id).order_by(EloModel.id.desc()).first()
         return {"id": elo.id,
                 "image_id": elo.image_id,
-                "score": elo.score, 
+                "mu": elo.mu, 
+                "sigma": elo.sigma, 
                 "created_at": elo.created_at}
     except sqlalchemy.orm.exc.NoResultFound:
         raise Exception(f"Elo score for image with image_id: {image_id} does not exist")

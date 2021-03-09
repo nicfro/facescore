@@ -7,6 +7,7 @@ from ..orm_models.db_models import ImageModel
 from . import DBC
 from src.logic.hasher import Hasher
 import base64
+from ..orm_models.db_models import EloModel
 
 
 router = APIRouter()
@@ -25,11 +26,23 @@ async def post_image(user_id: int = Form(...), file: UploadFile = File(...), db:
                   "file": file.file.read()}
     image_model = ImageModel(**image_args)
     
+
+
     # Commit to DB
     db.add(image_model)
     db.commit()
     db.refresh(image_model)
-    return {"message": f"Image created with id: {image_model.id}"}
+
+    elo_args = {"image_id": image_model.id,
+                      "score": 1500}
+
+    elo_model = EloModel(**elo_args)
+
+    db.add(elo_model)
+    db.commit()
+    db.refresh(elo_model)
+
+    return {"message": f"Image created with id: {image_model.id} with eloscore {elo_model.score}"}
 
 
 @router.get("/images/id/{image_id}", response_model=ImageSchema)

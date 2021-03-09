@@ -31,7 +31,7 @@ class UserCreate(BaseModel):
     gender: str
     country: str
     password: str
-    birthdate: Optional[date]
+    birthdate: date
 
 class UserUpdate(BaseModel):
     """

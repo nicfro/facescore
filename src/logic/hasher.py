@@ -18,4 +18,3 @@ class Hasher:
         salt = "".join(salt)
         hash_value = self.myctx.hash(password+salt)
         return hash_value, salt
-

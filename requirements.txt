@@ -11,3 +11,4 @@ pytest
 passlib
 pyjwt>=2.0.1
 python-multipart>=0.0.5
+trueskill>=0.4.5

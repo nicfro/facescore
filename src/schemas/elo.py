@@ -10,7 +10,8 @@ class EloSchema(BaseModel):
     """
     id: int
     image_id: int
-    score: int
+    mu: float
+    sigma: float
     created_at: datetime
     class Config:
         orm_mode = True
@@ -21,20 +22,20 @@ class EloCreate(BaseModel):
     Fields information needed for POST
     """
     image_id: int
-    score: int
 
 
-class UserUpdate(BaseModel):
+class EloUpdate(BaseModel):
     """
     Fields information needed for Update
     """
     id: int
     image_id: Optional[int]
-    score: Optional[int]
+    mu: Optional[float]
+    sigma: Optional[float]
 
 
 
-class UserDelete(BaseModel):
+class EloDelete(BaseModel):
     """
     Fields information needed for Delete
     """

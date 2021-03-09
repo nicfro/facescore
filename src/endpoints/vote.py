@@ -6,6 +6,8 @@ from ..schemas.votes import VoteSchema, VoteCreate, VoteDelete, VoteUpdate
 from ..orm_models.db_models import VoteModel
 from . import DBC
 from .elo import get_elo_by_image_id
+from logic.elo import calculateElo
+from ..orm_models.db_models import EloModel
 
 router = APIRouter()
 
@@ -82,17 +84,35 @@ def post_one_vote(vote: VoteCreate, db: Session = Depends(DBC.get_session)):
     try:
         vote_to_create = VoteModel(**vote.dict())
 
-        # IDENTIFY WINNER, UPDATE ACCORDINGLY
         left_image_id = vote_to_create.left_image_id
-        left_image_previous_score = get_elo_by_image_id(left_image_id).score
-        
         right_image_id = vote_to_create.right_image_id
-        right_image_previous_score = get_elo_by_image_id(right_image_id).score
 
+        winner = vote_to_create.winner
+        loser = [left_image_id, right_image_id][winner is left_image_id]
 
-        db.add(vote_to_create)
+        scores = calculateElo(winner, loser)
+
+        elo_args_winner = {"image_id": winner,
+                           "mu": scores["winner_mu"],
+                           "sigma": scores["winner_sigma"]}
+
+        elo_model_winner = EloModel(**elo_args_winner)
+        
+        elo_args_loser = {"image_id": loser,
+                          "mu": scores["loser_mu"],
+                          "sigma": scores["loser_sigma"]}
+
+        elo_model_loser = EloModel(**elo_args_loser)
+        
+        objects = [
+            elo_model_winner,
+            elo_model_loser,
+            vote_to_create
+        ]
+        db.bulk_save_objects(objects)
+
         db.commit()
-        db.refresh(vote_to_create)
+        return {"message": f"Vote was cast on image: {winner} and {loser}"}
     except sqlalchemy.exc.IntegrityError:
         raise Exception(f"User or images does not exist")
     # calculate new elos

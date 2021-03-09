@@ -1,5 +1,5 @@
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy import Column, VARCHAR, TIMESTAMP, ForeignKey, Integer, PrimaryKeyConstraint, VARBINARY, Date
+from sqlalchemy import Column, VARCHAR, TIMESTAMP, ForeignKey, Integer, PrimaryKeyConstraint, VARBINARY, Date, Float
 from sqlalchemy.sql import func
 
 BaseModel = declarative_base()
@@ -15,11 +15,11 @@ class UserModel(BaseModel):
     id = Column(Integer, unique=True, primary_key=True, index=True, autoincrement=True)
     name = Column(VARCHAR, index=True)
     email = Column(VARCHAR, unique=True, index=True)
-    gender = Column(VARCHAR, index=True)
-    country = Column(VARCHAR, index=True)
+    gender = Column(VARCHAR)
+    country = Column(VARCHAR)
     birthdate = Column(Date, unique=True, index=True)
-    hashed_password = Column(VARCHAR, unique=True, index=True)
-    salt = Column(VARCHAR, unique=True, index=True)
+    hashed_password = Column(VARCHAR, unique=True)
+    salt = Column(VARCHAR, unique=True)
     created_at = Column(TIMESTAMP, default=func.now())
     PrimaryKeyConstraint(id, name="PK_users_id")
 
@@ -64,7 +64,8 @@ class EloModel(BaseModel):
     # Register columns
     id = Column(Integer, unique=True, primary_key=True, index=True, autoincrement=True)
     image_id = Column(ForeignKey("images.id", name="FK_elo_image_id_images_id"))
-    score = Column(Integer())
+    mu = Column(Float, default=25)
+    sigma = Column(Float, default=8.33)
     created_at = Column(TIMESTAMP, default=func.now())
 
     PrimaryKeyConstraint(id, name="PK_elo_id")

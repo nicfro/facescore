@@ -85,19 +85,22 @@ def post_one_user(user: UserCreate, db: Session = Depends(DBC.get_session)):
     :param db: DB session
     :return: Created user entry
     """
-    user_args = user.dict()
-    # Create hashed passwordxw
-    user_args["hashed_password"], user_args["salt"] = hasher.hash(user.password)    
+    try:
+        user_args = user.dict()
+        # Create hashed passwordxw
+        user_args["hashed_password"], user_args["salt"] = hasher.hash(user.password)    
 
-    # Create User Model
-    del user_args['password']
-    user_model = UserModel(**user_args)
+        # Create User Model
+        del user_args['password']
+        user_model = UserModel(**user_args)
 
-    # Commit to DB
-    db.add(user_model)
-    db.commit()
-    db.refresh(user_model)
-    return {"message": f"user created with id: {user_model.id}"}
+        # Commit to DB
+        db.add(user_model)
+        db.commit()
+        db.refresh(user_model)
+        return {"message": f"user created with id: {user_model.id}"}
+    except sqlalchemy.exc.IntegrityError:
+        raise Exception(f"Email duplicate")
 
 
 @router.put("/users", response_model=UserSchema)
