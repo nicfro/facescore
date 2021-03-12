@@ -34,7 +34,7 @@ async def post_image(user_id: int = Form(...), file: UploadFile = File(...), db:
     db.refresh(image_model)
 
     elo_args = {"image_id": image_model.id,
-                      "score": 1500}
+                "score": 1500}
 
     elo_model = EloModel(**elo_args)
 
