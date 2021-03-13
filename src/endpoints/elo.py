@@ -5,7 +5,6 @@ from fastapi import Depends, APIRouter
 from ..schemas.elo import EloSchema, EloCreate
 from ..orm_models.db_models import EloModel
 from . import DBC
-from src.logic.hasher import Hasher
 
 router = APIRouter()
 
