@@ -11,7 +11,7 @@ class Hasher:
         """Verify a password, given the salt and hash value of said pass word"""
         return self.myctx.verify(password+salt, hashed_password)
 
-    def hash(self, password) -> (str, str):
+    def hash(self, password):
         """Hash a password with a generated salt"""
         salt=[]
         [salt.append(random.choice(self.SALT_ALPHABET)) for x in range(16)]

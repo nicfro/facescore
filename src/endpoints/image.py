@@ -13,7 +13,7 @@ from ..orm_models.db_models import EloModel
 router = APIRouter()
 #, file: UploadFile = File(...)
 @router.post("/images")
-async def post_image(user_id: int = Form(...), file: UploadFile = File(...), db: Session = Depends(DBC.get_session)):
+async def post_image(user_id: str, file: str, db: Session = Depends(DBC.get_session)):
     """
     POST one image
     Gets user_id from form and file as an UploadFile object
@@ -23,7 +23,7 @@ async def post_image(user_id: int = Form(...), file: UploadFile = File(...), db:
     :return: Created image entry
     """
     image_args = {"user_id": user_id,
-                  "file": file.file.read()}
+                  "file": file}
     image_model = ImageModel(**image_args)
     
 
@@ -59,7 +59,7 @@ async def get_image_by_id(image_id: int, db: Session = Depends(DBC.get_session))
         image = db.query(ImageModel).filter(ImageModel.id == image_id).one()
         return {"id": image.id,
                 "user_id": image.user_id,
-                "file": base64.b64encode(image.file), 
+                "file": image.file, 
                 "created_at": image.created_at}
     except sqlalchemy.orm.exc.NoResultFound:
         raise Exception(f"{image_id} does not exist")

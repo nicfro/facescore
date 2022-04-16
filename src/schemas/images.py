@@ -10,7 +10,7 @@ class ImageSchema(BaseModel):
     """
     id: int
     user_id: int
-    file: bytes
+    file: str
     created_at: datetime
     class Config:
         orm_mode = True
@@ -20,16 +20,16 @@ class ImageCreate(BaseModel):
     Fields information needed for POST
     """
     user_id: int
-    file: Optional[bytes]
+    file: str
 
 
 class ImageUpdate(BaseModel):
     """
     Fields information needed for Update
     """
-    id: Optional[int]
+    id: int
     user_id: Optional[int]
-    file: Optional[bytes]
+    file: str
 
 
 class UserDelete(BaseModel):

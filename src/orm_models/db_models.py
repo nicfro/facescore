@@ -34,7 +34,7 @@ class ImageModel(BaseModel):
     id = Column(Integer, unique=True, primary_key=True, autoincrement=True)
     user_id = Column(ForeignKey("users.id", name="FK_images_user_id_user_id"))
     created_at = Column(TIMESTAMP, default=func.now())
-    file = Column(VARBINARY)
+    file = Column(VARCHAR)
 
     PrimaryKeyConstraint(id, name="PK_images_id")
 
