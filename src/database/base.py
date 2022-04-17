@@ -37,8 +37,9 @@ class DBConnector:
             raise DBError("Could not retrieve DB config")
 
         # Create connection string
-        self.connection_string = f"mssql+pyodbc://{self.DB_USER}:{self.DB_PASSWORD}@{self.DB_HOST}/{self.DB_NAME}?driver={self.DB_DRIVER}"
-
+        #self.connection_string = f"mssql+pyodbc://{self.DB_USER}:{self.DB_PASSWORD}@{self.DB_HOST}/{self.DB_NAME}?driver={self.DB_DRIVER}"
+        self.connection_string = f"postgresql+psycopg2://{self.DB_USER}:{self.DB_PASSWORD}@{self.DB_HOST}/{self.DB_NAME}"
+    
     def __init_db(self):
         """
         Create SQLAlchemy DB connector engine and create database if it does not exist

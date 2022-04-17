@@ -32,18 +32,14 @@ class UserCreate(BaseModel):
     country: str
     password: str
     birthdate: date
-    created_at: datetime
 
 class UserUpdate(BaseModel):
     """
     Fields information needed for Update
     """
     id: int
-    name: Optional[str]
     email: Optional[str]
-    gender: Optional[str]
     country: Optional[str]
-    birthdate: Optional[date]
 
 
 class UserDelete(BaseModel):
