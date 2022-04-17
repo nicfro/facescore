@@ -84,12 +84,9 @@ def post_one_vote(vote: VoteCreate, db: Session = Depends(DBC.get_session)):
     try:
         vote_to_create = VoteModel(**vote.dict())
 
-        left_image_id = vote_to_create.left_image_id
-        right_image_id = vote_to_create.right_image_id
+        winner = vote_to_create.winner_image_id
+        loser = vote_to_create.loser_image_id
 
-        winner = vote_to_create.winner
-        loser = [left_image_id if winner == right_image_id else right_image_id]
-        
         scores = calculateElo(winner, loser)
 
         elo_args_winner = {"image_id": winner,

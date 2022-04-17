@@ -2,12 +2,14 @@ import os
 import sys
 sys.path.insert(0, os.getcwd())
 
-from sqlalchemy import create_engine
+from sqlalchemy import create_engine, MetaData
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy_utils import database_exists, create_database
 from src.utils.custom_error_handlers import DBError
 from src.utils.common_logger import logger
 from src.settings import load_config
+from sqlalchemy.ext.declarative import declarative_base
+from importlib import import_module
 
 
 class DBConnector:
@@ -15,6 +17,7 @@ class DBConnector:
         self.__check_config()
         self.__init_db()
         self.__init_session_maker()
+        self.__init_tables()
 
     def __check_config(self):
         # Load parameters from .ENV
@@ -57,6 +60,13 @@ class DBConnector:
             self.Session = sessionmaker(bind=self.engine)
         except Exception as err:
             raise DBError(f"Failed to create database session {err}")
+
+    def __init_tables(self):
+        # Added to models.tables the new table I needed ( format Table as written above )
+        models = import_module('orm_models.db_models')
+        for table_model in models.ModelOrder.tables:
+            table_model.__table__.create(bind=self.engine, checkfirst=True)
+        
 
     def get_session(self):
         """

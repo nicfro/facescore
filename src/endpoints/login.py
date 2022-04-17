@@ -13,17 +13,17 @@ hasher = Hasher()
 router = APIRouter()
 
 
-@router.get("/login/{user_id}")
-def login_user_by_id(user_name: str, user_password: str, db: Session = Depends(DBC.get_session)):
+@router.get("/login/{user_name}")
+def login_user_by_id(user_name: str, password: str, db: Session = Depends(DBC.get_session)):
     """
     GET login token for user
-    :param user_id: User ID to log in
+    :param user_name: User ID to log in
     :param db: DB session
     :return: Retrieved login token
     """
     try:
         user = db.query(UserModel).filter(UserModel.name == user_name).one()
-        if hasher.verify(user_password, user.salt, str(user.hashed_password)):
+        if hasher.verify(password, user.salt, str(user.hashed_password)):
             token = encode_auth_token(user.id, 1000)
             return {"jwt_token": token}
         else:

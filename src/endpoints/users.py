@@ -1,3 +1,4 @@
+from msilib.schema import Error
 from typing import List
 import sqlalchemy
 from sqlalchemy.orm import Session
@@ -25,8 +26,9 @@ def get_all_users(db: Session = Depends(DBC.get_session)):
              "gender": user.gender,
              "country": user.country,
              "hashed_password": str(user.hashed_password), 
-             "birthdate": str(user.birthdate),
-             "salt": user.salt} for user in db.query(UserModel).all()]
+             "birthdate": user.birthdate,
+             "salt": user.salt,
+             "created_at": user.created_at} for user in db.query(UserModel).all()]
 
 
 @router.get("/users/name/{user_name}", response_model=UserSchema)
@@ -46,8 +48,9 @@ def get_one_user_by_name(user_name: str, db: Session = Depends(DBC.get_session))
                 "gender": user.gender,
                 "country": user.country,
                 "hashed_password": str(user.hashed_password), 
-                "birthdate": str(user.birthdate),
-                "salt": user.salt}
+                "birthdate": user.birthdate,
+                "salt": user.salt,
+                "created_at": user.created_at}
     except sqlalchemy.orm.exc.NoResultFound:
         raise Exception(f"{user_name} does not exist")
 
@@ -69,14 +72,15 @@ def get_one_user_by_id(user_id: str, db: Session = Depends(DBC.get_session)):
                 "gender": user.gender,
                 "country": user.country,
                 "hashed_password": str(user.hashed_password), 
-                "birthdate": str(user.birthdate),
-                "salt": user.salt}
+                "birthdate": user.birthdate,
+                "salt": user.salt,
+                "created_at": user.created_at}
     except sqlalchemy.orm.exc.NoResultFound:
         raise Exception(f"{user_id} does not exist")
 
 
 
-@router.post("/users", response_model=UserSchema)
+@router.post("/users", response_model=UserCreate)
 def post_one_user(user: UserCreate, db: Session = Depends(DBC.get_session)):
     """
     POST one user
@@ -85,6 +89,7 @@ def post_one_user(user: UserCreate, db: Session = Depends(DBC.get_session)):
     :param db: DB session
     :return: Created user entry
     """
+
     try:
         user_args = user.dict()
         # Create hashed passwordxw
@@ -92,18 +97,27 @@ def post_one_user(user: UserCreate, db: Session = Depends(DBC.get_session)):
 
         # Create User Model
         del user_args['password']
-        user_model = UserModel(**user_args)
+        user = UserModel(**user_args)
 
         # Commit to DB
-        db.add(user_model)
+        db.add(user)
         db.commit()
-        db.refresh(user_model)
-        return {"message": f"user created with id: {user_model.id}"}
+        db.refresh(user)
+        return {
+                "id": user.id,
+                "name": user.name,
+                "email": user.email, 
+                "gender": user.gender,
+                "country": user.country,
+                "birthdate": user.birthdate,
+                "created_at": user.created_at
+                }
+
     except sqlalchemy.exc.IntegrityError:
-        raise Exception(f"Email duplicate")
+        raise Exception(f"Duplicate Email: {user.email} or Username: {user.name}")
 
 
-@router.put("/users", response_model=UserSchema)
+@router.put("/users", response_model=UserUpdate)
 def put_one_user(user: UserUpdate, db: Session = Depends(DBC.get_session)):
     """
     PUT one user
@@ -118,20 +132,18 @@ def put_one_user(user: UserUpdate, db: Session = Depends(DBC.get_session)):
 
         # Update model class variable for requested fields
         for var, value in vars(user).items():
-            setattr(user_to_put, var, value) if value else None
+            setattr(user_to_put, var, value) if value else getattr(user_to_put,var)
 
         # Commit to DB
         db.add(user_to_put)
         db.commit()
         db.refresh(user_to_put)
-        return {"id": user.id,
-                "name": user.name,
-                "email": user.email, 
-                "gender": user.gender,
-                "country": user.country,
-                "hashed_password": str(user.hashed_password), 
-                "birthdate": str(user.birthdate),
-                "salt": user.salt}
+        return {"id": user_to_put.id,
+                "name": user_to_put.name,
+                "email": user_to_put.email, 
+                "gender": user_to_put.gender,
+                "country": user_to_put.country,
+                "birthdate": user_to_put.birthdate}
     except sqlalchemy.orm.exc.NoResultFound:
         raise Exception(f"{user.id} does not exist")
 

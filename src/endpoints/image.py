@@ -6,7 +6,6 @@ from ..schemas.images import ImageSchema, ImageCreate
 from ..orm_models.db_models import ImageModel
 from . import DBC
 from src.logic.hasher import Hasher
-import base64
 from ..orm_models.db_models import EloModel
 
 

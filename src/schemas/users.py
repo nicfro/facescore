@@ -32,6 +32,7 @@ class UserCreate(BaseModel):
     country: str
     password: str
     birthdate: date
+    created_at: datetime
 
 class UserUpdate(BaseModel):
     """
@@ -43,7 +44,6 @@ class UserUpdate(BaseModel):
     gender: Optional[str]
     country: Optional[str]
     birthdate: Optional[date]
-    salt: Optional[str]
 
 
 class UserDelete(BaseModel):

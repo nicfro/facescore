@@ -10,9 +10,8 @@ class VoteSchema(BaseModel):
     """
     id: int
     user_id: int
-    left_image_id: int
-    right_image_id: int
-    winner: int
+    loser_image_id: Optional[int]
+    winner_image_id: Optional[int]
     created_at: datetime
 
     class Config:
@@ -23,9 +22,8 @@ class VoteCreate(BaseModel):
     Fields information needed for POST
     """
     user_id: int
-    left_image_id: int
-    right_image_id: int
-    winner: int
+    loser_image_id: Optional[int]
+    winner_image_id: Optional[int]
 
 class VoteUpdate(BaseModel):
     """
@@ -33,9 +31,8 @@ class VoteUpdate(BaseModel):
     """
     id: int
     user_id: Optional[int]
-    left_image_id: Optional[int]
-    right_image_id: Optional[int]
-    winner: Optional[int]
+    loser_image_id: Optional[int]
+    winner_image_id: Optional[int]
 
 
 class VoteDelete(BaseModel):

@@ -1,5 +1,5 @@
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy import Column, VARCHAR, TIMESTAMP, ForeignKey, Integer, PrimaryKeyConstraint, VARBINARY, Date, Float
+from sqlalchemy import Column, VARCHAR, DATETIME, ForeignKey, Integer, Date, Float
 from sqlalchemy.sql import func
 
 BaseModel = declarative_base()
@@ -12,16 +12,16 @@ class UserModel(BaseModel):
     __tablename__ = "users"
 
     # Register columns
-    id = Column(Integer, unique=True, primary_key=True, index=True, autoincrement=True)
-    name = Column(VARCHAR, index=True)
-    email = Column(VARCHAR, unique=True, index=True)
-    gender = Column(VARCHAR)
-    country = Column(VARCHAR)
-    birthdate = Column(Date, unique=True, index=True)
-    hashed_password = Column(VARCHAR, unique=True)
-    salt = Column(VARCHAR, unique=True)
-    created_at = Column(TIMESTAMP, default=func.now())
-    PrimaryKeyConstraint(id, name="PK_users_id")
+    id = Column(Integer, index=True, unique=True, autoincrement=True, primary_key=True)
+    name = Column(VARCHAR(length=255), index=True, unique=True)
+    email = Column(VARCHAR(length=255), index=True, unique=True)
+    gender = Column(VARCHAR(length=255))
+    country = Column(VARCHAR(length=255))
+    birthdate = Column(Date, index=True)
+    hashed_password = Column(VARCHAR(length=255))
+    salt = Column(VARCHAR(length=255))
+    created_at = Column(DATETIME, default=func.now())
+
 
 
 class ImageModel(BaseModel):
@@ -31,12 +31,11 @@ class ImageModel(BaseModel):
     __tablename__ = "images"
 
     # Register columns
-    id = Column(Integer, unique=True, primary_key=True, autoincrement=True)
+    id = Column(Integer, unique=True, autoincrement=True, primary_key=True)
     user_id = Column(ForeignKey("users.id", name="FK_images_user_id_user_id"))
-    created_at = Column(TIMESTAMP, default=func.now())
-    file = Column(VARCHAR)
+    file = Column(VARCHAR(length=255))
+    created_at = Column(DATETIME, default=func.now())
 
-    PrimaryKeyConstraint(id, name="PK_images_id")
 
 
 class VoteModel(BaseModel):
@@ -46,14 +45,13 @@ class VoteModel(BaseModel):
     __tablename__ = "votes"
 
     # Register columns
-    id = Column(Integer, unique=True, primary_key=True, index=True, autoincrement=True)
+    id = Column(Integer, unique=True, index=True, autoincrement=True, primary_key=True)
     user_id = Column(ForeignKey("users.id", name="FK_votes_user_id_users_id"))
-    left_image_id = Column(ForeignKey("images.id", name="FK_votes_left_image_id_images_id"))
-    right_image_id = Column(ForeignKey("images.id", name="FK_votes_right_image_id_images_id"))
-    winner = Column(ForeignKey("images.id", name="FK_votes_winner_image_id_images_id"))
-    created_at = Column(TIMESTAMP, default=func.now())
+    winner_image_id = Column(ForeignKey("images.id", name="FK_winner_image_id_images_id"))
+    loser_image_id = Column(ForeignKey("images.id", name="FK_loser_image_id_images_id"))
+    created_at = Column(DATETIME, default=func.now())
 
-    PrimaryKeyConstraint(id, name="PK_votes_id")
+
 
 class EloModel(BaseModel):
     """
@@ -62,10 +60,16 @@ class EloModel(BaseModel):
     __tablename__ = "elo"
 
     # Register columns
-    id = Column(Integer, unique=True, primary_key=True, index=True, autoincrement=True)
+    id = Column(Integer, unique=True, index=True, autoincrement=True, primary_key=True)
     image_id = Column(ForeignKey("images.id", name="FK_elo_image_id_images_id"))
     mu = Column(Float, default=25)
     sigma = Column(Float, default=8.33)
-    created_at = Column(TIMESTAMP, default=func.now())
+    created_at = Column(DATETIME, default=func.now())
 
-    PrimaryKeyConstraint(id, name="PK_elo_id")
+
+
+class ModelOrder():
+    tables = [UserModel, 
+              ImageModel,
+              VoteModel,
+              EloModel]
