@@ -11,10 +11,14 @@ class Hasher:
         """Verify a password, given the salt and hash value of said pass word"""
         return self.myctx.verify(password+salt, hashed_password)
 
-    def hash(self, password):
+    def user_hash(self, password):
         """Hash a password with a generated salt"""
         salt=[]
         [salt.append(random.choice(self.SALT_ALPHABET)) for x in range(16)]
         salt = "".join(salt)
         hash_value = self.myctx.hash(password+salt)
         return hash_value, salt
+
+    def image_hash(self, image):
+        """Hash a base64 encoded image"""
+        return self.myctx.hash(image)

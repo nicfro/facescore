@@ -92,7 +92,7 @@ def post_one_user(user: UserCreate, db: Session = Depends(DBC.get_session)):
     try:
         user_args = user.dict()
         # Create hashed passwordxw
-        user_args["hashed_password"], user_args["salt"] = hasher.hash(user.password)    
+        user_args["hashed_password"], user_args["salt"] = hasher.user_hash(user.password)    
 
         # Create User Model
         del user_args['password']

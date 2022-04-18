@@ -4,15 +4,17 @@ from sqlalchemy.orm import Session
 from fastapi import Depends, APIRouter, UploadFile, File, Form
 from ..schemas.images import ImageSchema, ImageCreate
 from ..orm_models.db_models import ImageModel
-from . import DBC
+from . import DBC, S3
 from src.logic.hasher import Hasher
 from ..orm_models.db_models import EloModel
+import base64
 
 
 router = APIRouter()
 #, file: UploadFile = File(...)
 @router.post("/images")
-async def post_image(user_id: str, file: str, db: Session = Depends(DBC.get_session)):
+async def post_image(user_id: int = Form(...), file: UploadFile = File(...), db: Session = Depends(DBC.get_session)):
+    
     """
     POST one image
     Gets user_id from form and file as an UploadFile object
@@ -21,12 +23,17 @@ async def post_image(user_id: str, file: str, db: Session = Depends(DBC.get_sess
     :param db: DB session
     :return: Created image entry
     """
+
+    image_file = file.file.read()
+    image_file = base64.b64encode(image_file.file)
+
+    image_name = Hasher.image_hash(image_file)
+
+    # Store image in S3
     image_args = {"user_id": user_id,
-                  "file": file}
+                  "file": image_name}
     image_model = ImageModel(**image_args)
     
-
-
     # Commit to DB
     db.add(image_model)
     db.commit()

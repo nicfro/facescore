@@ -2,13 +2,12 @@ import os
 import sys
 sys.path.insert(0, os.getcwd())
 
-from sqlalchemy import create_engine, MetaData
+from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy_utils import database_exists, create_database
-from src.utils.custom_error_handlers import DBError
+from src.utils.custom_error_handlers import ConfigError, DBError
 from src.utils.common_logger import logger
 from src.settings import load_config
-from sqlalchemy.ext.declarative import declarative_base
 from importlib import import_module
 
 
@@ -32,9 +31,14 @@ class DBConnector:
         self.DB_DRIVER = os.environ.get('DB_DRIVER')
 
         # Check required fields exist
-        if None in [os.environ.get('DB_USER'), os.environ.get('DB_PASSWORD'), os.environ.get('DB_HOST'), os.environ.get('DB_PORT'), os.environ.get('DB_NAME')]:
+        if None in [os.environ.get('DB_USER'), 
+                    os.environ.get('DB_PASSWORD'), 
+                    os.environ.get('DB_HOST'), 
+                    os.environ.get('DB_PORT'), 
+                    os.environ.get('DB_NAME')]:
+                    
             logger.error("Could not retrieve DB config")
-            raise DBError("Could not retrieve DB config")
+            raise ConfigError("Could not retrieve DB config")
 
         # Create connection string
         #self.connection_string = f"mssql+pyodbc://{self.DB_USER}:{self.DB_PASSWORD}@{self.DB_HOST}/{self.DB_NAME}?driver={self.DB_DRIVER}"
