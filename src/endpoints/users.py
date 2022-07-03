@@ -3,18 +3,22 @@ from typing import List
 import sqlalchemy
 from sqlalchemy.orm import Session
 from fastapi import Depends, APIRouter
-from ..schemas.users import UserSchema, UserCreate, UserDelete, UserUpdate
+
+
+from ..schemas.users import UserSchema, UserCreate, UserAuth, UserUpdate
 from ..orm_models.db_models import UserModel
 from . import DBC
 from src.logic.hasher import Hasher
+from src.logic.jwt_handler import JWT_Handler
 
 
 hasher = Hasher()
 router = APIRouter()
+JWT = JWT_Handler()
 
 
 @router.get("/users", response_model=List[UserSchema])
-def get_all_users(db: Session = Depends(DBC.get_session)):
+def get_all_users(current_user: UserAuth = Depends(JWT.decode_auth_token), db: Session = Depends(DBC.get_session)):
     """
     GET all users
     :param db: DB session
@@ -152,7 +156,7 @@ def put_one_user(user: UserUpdate, db: Session = Depends(DBC.get_session)):
         raise Exception(f"{user.id} does not exist")
 
 
-@router.delete("/users/id/{user_id}", response_model=UserDelete)
+@router.delete("/users/id/{user_id}", response_model=UserAuth)
 def delete_one_user_by_id(user_id: str, db: Session = Depends(DBC.get_session)):
     """
     DELETE one user by ID

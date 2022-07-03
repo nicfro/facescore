@@ -6,15 +6,16 @@ from ..schemas.users import UserSchema
 from ..orm_models.db_models import UserModel
 from . import DBC
 from src.logic.hasher import Hasher
-from src.logic.jwt_handler import encode_auth_token
+from src.logic.jwt_handler import JWT_Handler
 
 
 hasher = Hasher()
 router = APIRouter()
+JWT = JWT_Handler()
 
 
-@router.get("/login/{user_name}")
-def login_user_by_id(user_name: str, password: str, db: Session = Depends(DBC.get_session)):
+@router.get("/login")
+def login_user(user_name: str, password: str, db: Session = Depends(DBC.get_session)):
     """
     GET login token for user
     :param user_name: User ID to log in
@@ -24,7 +25,7 @@ def login_user_by_id(user_name: str, password: str, db: Session = Depends(DBC.ge
     try:
         user = db.query(UserModel).filter(UserModel.name == user_name).one()
         if hasher.verify(password, user.salt, str(user.hashed_password)):
-            token = encode_auth_token(user.id, 1000)
+            token = JWT.encode_auth_token(user.id, 10)
             return {"jwt_token": token}
         else:
             return {"jwt_token": "wrong password"}
