@@ -74,8 +74,6 @@ async def get_image_for_vote(db: Session = Depends(DBC.get_session)):
              "created_at": image.created_at} for image in db.query(ImageModel).order_by(func.random()).limit(2).all()]
 
 
-
-
 @router.get("/images/id/{image_id}", response_model=ImageSchema)
 async def get_image_by_id(image_id: int, db: Session = Depends(DBC.get_session)):
     """

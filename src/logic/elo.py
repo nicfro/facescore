@@ -1,3 +1,8 @@
+import os
+import sys
+
+sys.path.insert(0, os.getcwd())
+
 from src.endpoints.elo import get_elo_by_image_id
 from src.endpoints import DBC
 from trueskill import rate_1vs1, Rating
@@ -16,4 +21,5 @@ def calculateElo(winner, loser):
     return {"winner_mu": winner_trueskill.mu,
             "winner_sigma": winner_trueskill.sigma,
             "loser_mu": loser_trueskill.mu,
-            "loser_sigma": loser_trueskill.sigma,}
+            "loser_sigma": loser_trueskill.sigma}
+

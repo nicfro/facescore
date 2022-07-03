@@ -31,10 +31,10 @@ def get_all_votes(db: Session = Depends(DBC.get_session)):
 @router.get("/votes/user/{user_id}", response_model=VoteSchema)
 def get_votes_by_user_id(user_id: str, db: Session = Depends(DBC.get_session)):
     """
-    GET one vote by name
-    :param vote_name: Vote name to get
+    GET all votes made by user
+    :param user_id: user_id to fetch votes from
     :param db: DB session
-    :return: Retrieved vote entry
+    :return: list of votes by user
     """
     try:
         # Get vote by name
@@ -72,7 +72,7 @@ def get_vote_by_id(vote_id: str, db: Session = Depends(DBC.get_session)):
         raise Exception(f"{vote_id} does not exist")
 
 
-@router.post("/votes", response_model=VoteSchema)
+@router.post("/votes")
 def post_one_vote(vote: VoteCreate, db: Session = Depends(DBC.get_session)):
     """
     POST one vote
@@ -114,7 +114,6 @@ def post_one_vote(vote: VoteCreate, db: Session = Depends(DBC.get_session)):
         raise Exception(f"User or images does not exist")
     # calculate new elos
     # update elos
-
 
 
 

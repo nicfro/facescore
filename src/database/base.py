@@ -8,7 +8,7 @@ from sqlalchemy_utils import database_exists, create_database
 from src.utils.custom_error_handlers import ConfigError, DBError
 from src.utils.common_logger import logger
 from src.settings import load_config
-from importlib import import_module
+from src.orm_models import db_models
 
 
 class DBConnector:
@@ -68,8 +68,7 @@ class DBConnector:
 
     def __init_tables(self):
         # Added to models.tables the new table I needed ( format Table as written above )
-        models = import_module('orm_models.db_models')
-        for table_model in models.ModelOrder.tables:
+        for table_model in db_models.ModelOrder.tables:
             table_model.__table__.create(bind=self.engine, checkfirst=True)
         
 
