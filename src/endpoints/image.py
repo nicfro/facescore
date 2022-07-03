@@ -36,23 +36,18 @@ async def post_image(gender: str = Form(...), user_id: int = Form(...), image: U
     image_args = {"user_id": user_id,
                   "file": image_name}
     image_model = ImageModel(**image_args)
-    
-    # Commit to DB
     db.add(image_model)
     db.commit()
-    
 
     elo_args = {"image_id": image_model.id}
     elo_model = EloModel(**elo_args)
+    
+    S3_response = S3.upload_image(image_file, image_name)
 
     db.add(elo_model)
     db.commit()
     
-    S3_response = S3.upload_image(image_file, image_name)
-
     if S3_response["ResponseMetadata"]["HTTPStatusCode"] == 200:
-        db.refresh(image_model)
-        db.refresh(elo_model)
         return {"message": f"Image created with id: {image_model.id} with eloscore {elo_model.mu, elo_model.sigma}"}
 
     db.rollback()

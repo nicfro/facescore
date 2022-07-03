@@ -1,6 +1,7 @@
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy import Column, VARCHAR, TIMESTAMP, ForeignKey, Integer, Date, Float
 from sqlalchemy.sql import func
+from sqlalchemy.orm import relationship
 
 BaseModel = declarative_base()
 
@@ -23,7 +24,6 @@ class UserModel(BaseModel):
     created_at = Column(TIMESTAMP, default=func.now())
 
 
-
 class ImageModel(BaseModel):
     """
     Define Images database table ORM model
@@ -32,10 +32,9 @@ class ImageModel(BaseModel):
 
     # Register columns
     id = Column(Integer, unique=True, autoincrement=True, primary_key=True)
-    user_id = Column(ForeignKey("users.id", name="FK_images_user_id_user_id"))
+    user_id = Column(ForeignKey("users.id", name="FK_images_user_id_user_id", ondelete="CASCADE"))
     file = Column(VARCHAR(length=255), unique = True)
     created_at = Column(TIMESTAMP, default=func.now())
-
 
 
 class VoteModel(BaseModel):
@@ -46,11 +45,12 @@ class VoteModel(BaseModel):
 
     # Register columns
     id = Column(Integer, unique=True, index=True, autoincrement=True, primary_key=True)
-    user_id = Column(ForeignKey("users.id", name="FK_votes_user_id_users_id"))
-    winner_image_id = Column(ForeignKey("images.id", name="FK_winner_image_id_images_id"))
-    loser_image_id = Column(ForeignKey("images.id", name="FK_loser_image_id_images_id"))
-    created_at = Column(TIMESTAMP, default=func.now())
+    user_id = Column(ForeignKey("users.id", name="FK_votes_user_id_users_id", ondelete="CASCADE"))
 
+    winner_image_id = Column(ForeignKey("images.id", name="FK_winner_image_id_images_id", ondelete="CASCADE"))
+    loser_image_id = Column(ForeignKey("images.id", name="FK_loser_image_id_images_id", ondelete="CASCADE"))
+
+    created_at = Column(TIMESTAMP, default=func.now())
 
 
 class EloModel(BaseModel):
@@ -61,11 +61,10 @@ class EloModel(BaseModel):
 
     # Register columns
     id = Column(Integer, unique=True, index=True, autoincrement=True, primary_key=True)
-    image_id = Column(ForeignKey("images.id", name="FK_elo_image_id_images_id"))
+    image_id = Column(ForeignKey("images.id", name="FK_elo_image_id_images_id", ondelete="CASCADE"))
     mu = Column(Float, default=25)
     sigma = Column(Float, default=8.33)
     created_at = Column(TIMESTAMP, default=func.now())
-
 
 
 class ModelOrder():

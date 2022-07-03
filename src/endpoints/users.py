@@ -153,7 +153,7 @@ def put_one_user(user: UserUpdate, db: Session = Depends(DBC.get_session)):
 
 
 @router.delete("/users/id/{user_id}", response_model=UserDelete)
-def delete_one_user_by_id(user: UserDelete, db: Session = Depends(DBC.get_session)):
+def delete_one_user_by_id(user_id: str, db: Session = Depends(DBC.get_session)):
     """
     DELETE one user by ID
     It reads parameters from the request field, finds the entry and delete it
@@ -163,11 +163,11 @@ def delete_one_user_by_id(user: UserDelete, db: Session = Depends(DBC.get_sessio
     """
     try:
         # Delete entry
-        affected_rows = db.query(UserModel).filter(UserModel.id == user.id).delete()
+        affected_rows = db.query(UserModel).filter(UserModel.id == user_id).delete()
         if not affected_rows:
             raise sqlalchemy.orm.exc.NoResultFound
         # Commit to DB
         db.commit()
-        return {"id": user.id}
+        return {"id": user_id}
     except sqlalchemy.orm.exc.NoResultFound:
-        raise Exception(f"{user.id} does not exist")
+        raise Exception(f"{user_id} does not exist")
