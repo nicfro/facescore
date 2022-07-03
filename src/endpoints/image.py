@@ -9,11 +9,11 @@ from src.logic.hasher import Hasher
 from ..orm_models.db_models import EloModel
 import base64
 
-
+hasher = Hasher()
 router = APIRouter()
-#, file: UploadFile = File(...)
+
 @router.post("/images")
-async def post_image(user_id: int = Form(...), file: UploadFile = File(...), db: Session = Depends(DBC.get_session)):
+async def post_image(user_id: int = Form(...), image: UploadFile = File(...), db: Session = Depends(DBC.get_session)):
     
     """
     POST one image
@@ -24,10 +24,10 @@ async def post_image(user_id: int = Form(...), file: UploadFile = File(...), db:
     :return: Created image entry
     """
 
-    image_file = file.file.read()
-    image_file = base64.b64encode(image_file.file)
+    image_file = image.file.read()
+    image_file = base64.b64encode(image_file)
 
-    image_name = Hasher.image_hash(image_file)
+    image_name = hasher.image_hash(image_file)
 
     # Store image in S3
     image_args = {"user_id": user_id,
@@ -39,8 +39,7 @@ async def post_image(user_id: int = Form(...), file: UploadFile = File(...), db:
     db.commit()
     db.refresh(image_model)
 
-    elo_args = {"image_id": image_model.id,
-                "score": 1500}
+    elo_args = {"image_id": image_model.id}
 
     elo_model = EloModel(**elo_args)
 
@@ -48,7 +47,7 @@ async def post_image(user_id: int = Form(...), file: UploadFile = File(...), db:
     db.commit()
     db.refresh(elo_model)
 
-    return {"message": f"Image created with id: {image_model.id} with eloscore {elo_model.score}"}
+    return {"message": f"Image created with id: {image_model.id} with eloscore {elo_model.mu, elo_model.sigma}"}
 
 
 @router.get("/images/id/{image_id}", response_model=ImageSchema)

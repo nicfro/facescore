@@ -33,7 +33,7 @@ class ImageModel(BaseModel):
     # Register columns
     id = Column(Integer, unique=True, autoincrement=True, primary_key=True)
     user_id = Column(ForeignKey("users.id", name="FK_images_user_id_user_id"))
-    file = Column(VARCHAR(length=255))
+    file = Column(VARCHAR(length=255), unique = True)
     created_at = Column(TIMESTAMP, default=func.now())
 
 
