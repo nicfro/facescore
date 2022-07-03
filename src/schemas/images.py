@@ -15,6 +15,7 @@ class ImageSchema(BaseModel):
     class Config:
         orm_mode = True
 
+
 class ImageCreate(BaseModel):
     """
     Fields information needed for POST

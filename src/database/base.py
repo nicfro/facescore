@@ -50,7 +50,7 @@ class DBConnector:
         """
         self.engine = create_engine(self.connection_string)
 
-        # Create database if it does not exist
+        # Create database if not exist
         if not database_exists(self.engine.url):
             try:
                 create_database(self.engine.url)
