@@ -2,7 +2,6 @@ from typing import List
 import sqlalchemy
 from sqlalchemy.orm import Session
 from fastapi import Depends, APIRouter
-from ..schemas.users import UserSchema
 from ..orm_models.db_models import UserModel
 from . import DBC
 from src.logic.hasher import Hasher

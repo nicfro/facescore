@@ -3,7 +3,6 @@ from typing import Optional
 
 from fastapi import HTTPException
 from fastapi.security import OAuth2
-from fastapi.security.base import SecurityBase
 from fastapi.security.utils import get_authorization_scheme_param
 from fastapi.openapi.models import OAuthFlows as OAuthFlowsModel
 

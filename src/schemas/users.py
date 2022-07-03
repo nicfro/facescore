@@ -42,8 +42,8 @@ class UserUpdate(BaseModel):
     country: Optional[str]
 
 
-class UserDelete(BaseModel):
+class UserAuth(BaseModel):
     """
-    Fields information needed for Delete
+    Fields information needed for User Auth
     """
     id: int
