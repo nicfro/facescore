@@ -1,0 +1,12 @@
+# docker-compose.yml
+version: '2'
+services:
+  facescore:
+    build:
+      context: .
+    container_name: "facescore"
+    restart: always
+    ports:
+      - "5000:5000"
+    env_file:
+      - .env

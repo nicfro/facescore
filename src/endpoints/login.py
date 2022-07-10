@@ -1,8 +1,11 @@
-from typing import List
+import os
+import sys
+sys.path.insert(0, os.getcwd())
+
 import sqlalchemy
 from sqlalchemy.orm import Session
 from fastapi import Depends, APIRouter
-from ..orm_models.db_models import UserModel
+from src.orm_models.db_models import UserModel
 from . import DBC
 from src.logic.hasher import Hasher
 from src.logic.jwt_handler import JWT_Handler
@@ -24,7 +27,7 @@ def login_user(user_name: str, password: str, db: Session = Depends(DBC.get_sess
     try:
         user = db.query(UserModel).filter(UserModel.name == user_name).one()
         if hasher.verify(password, user.salt, str(user.hashed_password)):
-            token = JWT.encode_auth_token(user.id, 10)
+            token = JWT.encode_auth_token(user.id, 10000)
             return {"jwt_token": token}
         else:
             return {"jwt_token": "wrong password"}

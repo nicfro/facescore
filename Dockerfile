@@ -1,6 +1,6 @@
-FROM python:3.8
+FROM python:3.9
 
-EXPOSE 80
+EXPOSE 5000
 
 COPY . .
 
@@ -9,7 +9,13 @@ ENV DB_PASSWORD=$DB_PASSWORD
 ENV DB_USER=$DB_USER
 ENV DB_NAME=$DB_NAME
 ENV DB_PORT=$DB_PORT
+ENV DB_DRIVER=$DB_DRIVER
+ENV JWT_KEY=$JWT_KEY
+ENV AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID
+ENV AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY
+ENV AWS_REGION_NAME=$AWS_REGION_NAME
+ENV AWS_BUCKET_NAME=$AWS_BUCKET_NAME
 
 RUN pip3 install --upgrade pip
 RUN pip install -r requirements.txt
-CMD ["uvicorn", "src.main:app", "--host", "0.0.0.0", "--port", "80"]
+CMD ["uvicorn", "src.main:app", "--host", "0.0.0.0", "--port", "5000"]

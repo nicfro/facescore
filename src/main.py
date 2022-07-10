@@ -11,7 +11,9 @@ from src.utils.common_logger import logger
 
 
 # Create API Application
-app = FastAPI()
+app = FastAPI(title="Facescore app", 
+              contact = {"name": "Nicolai Frost Jacobsen", 
+                         "email": "Nicolai.frost@gmail.com"})
 
 
 # Global error handler

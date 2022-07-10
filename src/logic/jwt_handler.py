@@ -1,16 +1,17 @@
 import os
 import sys
+import datetime
 sys.path.insert(0, os.getcwd())
 
 
 import jwt
-import datetime
 from fastapi import Depends
 
 from src.settings import load_config
 from src.utils.common_logger import logger
 from src.utils.custom_error_handlers import ConfigError
 from src.logic.auth import OAuth2PasswordBearerCookie
+from src.utils.custom_error_handlers import AuthError
 
 oauth2_scheme = OAuth2PasswordBearerCookie(tokenUrl="/token")
 
@@ -62,10 +63,12 @@ class JWT_Handler:
         try:
             payload = jwt.decode(auth_token, self.JWT_KEY, algorithms=["HS256"])
             return payload['sub']
-        except jwt.ExpiredSignatureError:
-            return 'Signature expired. Please log in again.'
-        except jwt.InvalidTokenError:
-            return 'Invalid token. Please log in again.'
+        except jwt.ExpiredSignatureError as err:
+            raise AuthError(f"Expired Token {err}")
+        except jwt.InvalidTokenError as err:
+            raise AuthError(f"Invalid Token {err}")
+
+
 
     def encode_auth_token(self, user_id, duration):
         """

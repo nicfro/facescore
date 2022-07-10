@@ -1,5 +1,4 @@
 import os
-import base64
 
 from src.settings import load_config
 from src.utils.common_logger import logger

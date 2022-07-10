@@ -1,9 +1,12 @@
-from typing import List
+import os
+import sys
+sys.path.insert(0, os.getcwd())
+
 import sqlalchemy
 from sqlalchemy.orm import Session
 from fastapi import Depends, APIRouter
-from ..schemas.elo import EloSchema, EloCreate
-from ..orm_models.db_models import EloModel
+from src.schemas.elo import EloSchema, EloCreate
+from src.orm_models.db_models import EloModel
 from . import DBC
 
 router = APIRouter()

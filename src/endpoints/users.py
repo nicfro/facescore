@@ -1,12 +1,14 @@
-from msilib.schema import Error
+import os
+import sys
+sys.path.insert(0, os.getcwd())
+
 from typing import List
 import sqlalchemy
 from sqlalchemy.orm import Session
 from fastapi import Depends, APIRouter
 
-
-from ..schemas.users import UserSchema, UserCreate, UserAuth, UserUpdate
-from ..orm_models.db_models import UserModel
+from src.schemas.users import UserSchema, UserCreate, UserAuth, UserUpdate
+from src.orm_models.db_models import UserModel
 from . import DBC
 from src.logic.hasher import Hasher
 from src.logic.jwt_handler import JWT_Handler
@@ -18,7 +20,7 @@ JWT = JWT_Handler()
 
 
 @router.get("/users", response_model=List[UserSchema])
-def get_all_users(current_user: UserAuth = Depends(JWT.decode_auth_token), db: Session = Depends(DBC.get_session)):
+def get_all_users(user_auth: UserAuth = Depends(JWT.decode_auth_token), db: Session = Depends(DBC.get_session)):
     """
     GET all users
     :param db: DB session

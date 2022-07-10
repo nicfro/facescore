@@ -1,12 +1,16 @@
+import os
+import sys
+sys.path.insert(0, os.getcwd())
+
 from typing import List
 import sqlalchemy
-from sqlalchemy import select, func, table, tablesample
-from sqlalchemy.orm import Session, aliased, load_only
+from sqlalchemy import func
+from sqlalchemy.orm import Session
 from fastapi import Depends, APIRouter, UploadFile, File, Form
-from ..schemas.images import ImageSchema
-from ..orm_models.db_models import ImageModel
+from src.schemas.images import ImageSchema
+from src.orm_models.db_models import ImageModel
 from . import DBC, S3
-from ..orm_models.db_models import EloModel
+from src.orm_models.db_models import EloModel
 from src.logic.hasher import Hasher
 
 import base64

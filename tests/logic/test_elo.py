@@ -1,5 +1,4 @@
 import os
-from sre_compile import isstring
 import sys
 
 sys.path.insert(0, os.getcwd())

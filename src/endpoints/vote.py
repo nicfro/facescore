@@ -1,12 +1,17 @@
+import os
+import sys
+
+sys.path.insert(0, os.getcwd())
+
 from typing import List
 import sqlalchemy
 from sqlalchemy.orm import Session
 from fastapi import Depends, APIRouter
-from ..schemas.votes import VoteSchema, VoteCreate, VoteDelete, VoteUpdate
-from ..orm_models.db_models import VoteModel
+from src.schemas.votes import VoteSchema, VoteCreate, VoteDelete
+from src.orm_models.db_models import VoteModel
 from . import DBC
-from logic.elo import calculateElo
-from ..orm_models.db_models import EloModel
+from src.logic.elo import calculateElo
+from src.orm_models.db_models import EloModel
 
 router = APIRouter()
 
