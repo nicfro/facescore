@@ -1,5 +1,6 @@
 import os
 import sys
+
 sys.path.insert(0, os.getcwd())
 
 import uvicorn
@@ -11,9 +12,10 @@ from src.utils.common_logger import logger
 
 
 # Create API Application
-app = FastAPI(title="Facescore app", 
-              contact = {"name": "Nicolai Frost Jacobsen", 
-                         "email": "Nicolai.frost@gmail.com"})
+app = FastAPI(
+    title="Facescore app",
+    contact={"name": "Nicolai Frost Jacobsen", "email": "Nicolai.frost@gmail.com"},
+)
 
 
 # Global error handler
@@ -21,7 +23,11 @@ app = FastAPI(title="Facescore app",
 async def validation_exception_handler(request, err):
     base_error_message = f"Failed to execute: {request.method}: {request.url}"
     logger.error(base_error_message)
-    return JSONResponse(status_code=400, content={"message": f"{base_error_message}", "detail": f"{err}"})
+    return JSONResponse(
+        status_code=400,
+        content={"message": f"{base_error_message}", "detail": f"{err}"},
+    )
+
 
 # Add endpoints
 app.include_router(docs.router)

@@ -13,3 +13,4 @@ pyjwt>=2.0.1
 python-multipart>=0.0.5
 trueskill>=0.4.5
 boto3>=1.21.42
+black>=22.6.0

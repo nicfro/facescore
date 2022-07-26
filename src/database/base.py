@@ -1,5 +1,6 @@
 import os
 import sys
+
 sys.path.insert(0, os.getcwd())
 
 from sqlalchemy import create_engine
@@ -20,30 +21,32 @@ class DBConnector:
 
     def __check_config(self):
         # Load parameters from .ENV
-        if os.path.isfile('ENV'):
-            load_config('ENV')
+        if os.path.isfile("ENV"):
+            load_config("ENV")
 
-        self.DB_USER = os.environ.get('DB_USER')
-        self.DB_PASSWORD =os.environ.get('DB_PASSWORD')
-        self.DB_HOST = os.environ.get('DB_HOST')
-        self.DB_PORT = os.environ.get('DB_PORT')
-        self.DB_NAME = os.environ.get('DB_NAME')
-        self.DB_DRIVER = os.environ.get('DB_DRIVER')
+        self.DB_USER = os.environ.get("DB_USER")
+        self.DB_PASSWORD = os.environ.get("DB_PASSWORD")
+        self.DB_HOST = os.environ.get("DB_HOST")
+        self.DB_PORT = os.environ.get("DB_PORT")
+        self.DB_NAME = os.environ.get("DB_NAME")
+        self.DB_DRIVER = os.environ.get("DB_DRIVER")
 
         # Check required fields exist
-        if None in [os.environ.get('DB_USER'), 
-                    os.environ.get('DB_PASSWORD'), 
-                    os.environ.get('DB_HOST'), 
-                    os.environ.get('DB_PORT'), 
-                    os.environ.get('DB_NAME')]:
-                    
+        if None in [
+            os.environ.get("DB_USER"),
+            os.environ.get("DB_PASSWORD"),
+            os.environ.get("DB_HOST"),
+            os.environ.get("DB_PORT"),
+            os.environ.get("DB_NAME"),
+        ]:
+
             logger.error("Could not retrieve DB config")
             raise ConfigError("Could not retrieve DB config")
 
         # Create connection string
-        #self.connection_string = f"mssql+pyodbc://{self.DB_USER}:{self.DB_PASSWORD}@{self.DB_HOST}/{self.DB_NAME}?driver={self.DB_DRIVER}"
+        # self.connection_string = f"mssql+pyodbc://{self.DB_USER}:{self.DB_PASSWORD}@{self.DB_HOST}/{self.DB_NAME}?driver={self.DB_DRIVER}"
         self.connection_string = f"postgresql+psycopg2://{self.DB_USER}:{self.DB_PASSWORD}@{self.DB_HOST}/{self.DB_NAME}"
-    
+
     def __init_db(self):
         """
         Create SQLAlchemy DB connector engine and create database if it does not exist
@@ -67,10 +70,13 @@ class DBConnector:
             raise DBError(f"Failed to create database session {err}")
 
     def __init_tables(self):
-        # Added to models.tables the new table I needed ( format Table as written above )
         for table_model in db_models.ModelOrder.tables:
             table_model.__table__.create(bind=self.engine, checkfirst=True)
-        
+
+    def drop_and_create_tables(self):
+        for table_model in reversed(db_models.ModelOrder.tables):
+            table_model.__table__.drop(self.engine)
+        self.__init_tables()
 
     def get_session(self):
         """
