@@ -3,30 +3,39 @@ import sys
 
 sys.path.insert(0, os.getcwd())
 
-from typing import List
-import sqlalchemy
 from sqlalchemy.orm import Session
-from fastapi import Depends, APIRouter
-from src.schemas.votes import VoteSchema, VoteCreate, VoteDelete
+from fastapi import Depends, APIRouter, HTTPException, status
+from src.schemas.votes import VoteCreate
+from src.schemas.users import UserSchema
 from src.orm_models.db_models import VoteModel
-from . import DBC
-from src.logic.elo import calculateElo
 from src.orm_models.db_models import EloModel
+from src.logic.elo import calculateElo
+from . import DBC
+from src.logic.auth import get_current_user
 
 router = APIRouter()
 
 
-@router.post("/votes")
-def post_one_vote(vote: VoteCreate, db: Session = Depends(DBC.get_session)):
+@router.post("/votes", response_model=VoteCreate)
+def post_one_vote(
+    vote: VoteCreate,
+    current_user: UserSchema = Depends(get_current_user),
+    db: Session = Depends(DBC.get_session),
+):
     """
     POST one vote
-    It reads parameters from the request field and add missing fields from default values defined in the model
-    :param vote: VoteBase class that contains all columns in the table
-    :param db: DB session
+    Gets user_id from current user, receives winner/loser ID from post
+    :param vote: VoteBase class that contains winner/loser image ID
     :return: Created vote entry
     """
     try:
-        vote_to_create = VoteModel(**vote.dict())
+        payload = {
+            "user_id": current_user.id,
+            "loser_image_id": vote.dict()["loser_image_id"],
+            "winner_image_id": vote.dict()["winner_image_id"],
+        }
+
+        vote_to_create = VoteModel(**payload)
 
         winner = vote_to_create.winner_image_id
         loser = vote_to_create.loser_image_id
@@ -53,6 +62,15 @@ def post_one_vote(vote: VoteCreate, db: Session = Depends(DBC.get_session)):
         db.bulk_save_objects(objects)
 
         db.commit()
-        return {"message": f"Vote was cast on image: {winner} and {loser}"}
-    except sqlalchemy.exc.IntegrityError:
-        raise Exception(f"User or images does not exist")
+
+        return {
+            "user_id": vote_to_create.user_id,
+            "loser_image_id": vote_to_create.loser_image_id,
+            "winner_image_id": vote_to_create.winner_image_id,
+        }
+    except:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="User or images does not exist",
+            headers={"WWW-Authenticate": "Bearer"},
+        )

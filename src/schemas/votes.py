@@ -24,7 +24,7 @@ class VoteCreate(BaseModel):
     Fields information needed for POST
     """
 
-    user_id: int
+    user_id: Optional[int]
     loser_image_id: Optional[int]
     winner_image_id: Optional[int]
 

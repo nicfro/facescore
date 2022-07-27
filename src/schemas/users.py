@@ -42,6 +42,5 @@ class UserUpdate(BaseModel):
     Fields information needed for Update
     """
 
-    id: int
     email: Optional[str]
     country: Optional[str]

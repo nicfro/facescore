@@ -3,62 +3,22 @@ import sys
 
 sys.path.insert(0, os.getcwd())
 
-from typing import List
 import sqlalchemy
 from sqlalchemy.orm import Session
-from fastapi import Depends, APIRouter, HTTPException, status
+from fastapi import Depends, APIRouter
 from src.schemas.users import UserSchema, UserCreate, UserUpdate
-from src.schemas.token import TokenData
 from fastapi.security import OAuth2PasswordBearer
 from src.orm_models.db_models import UserModel
 from . import DBC
 from src.logic.hasher import Hasher
 from src.logic.jwt_handler import JWT_Handler
+from src.logic.auth import get_current_user
 
 
 hasher = Hasher()
 router = APIRouter()
 JWT_test = JWT_Handler()
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
-
-
-async def get_current_user(
-    token: str = Depends(oauth2_scheme), db: Session = Depends(DBC.get_session)
-):
-    """
-    fetches current user using oauth2 validation
-    Query with header where
-    key is: Authorization
-    value is: bearer JWT_token
-    """
-    credentials_exception = HTTPException(
-        status_code=status.HTTP_401_UNAUTHORIZED,
-        detail="Could not validate credentials",
-        headers={"WWW-Authenticate": "Bearer"},
-    )
-    try:
-        user_id = JWT_test.decode_auth_token(token)["sub"]
-        if user_id is None:
-            raise credentials_exception
-        token_data = TokenData(user_id=user_id)
-    except:
-        raise credentials_exception
-
-    user = db.query(UserModel).filter(UserModel.id == token_data.user_id).one_or_none()
-    if user is None:
-        raise credentials_exception
-
-    return UserSchema(
-        id=user.id,
-        name=user.name,
-        email=user.email,
-        gender=user.gender,
-        country=user.country,
-        hashed_password=str(user.hashed_password),
-        birthdate=user.birthdate,
-        salt=user.salt,
-        created_at=user.created_at,
-    )
 
 
 @router.get("/users/me/", response_model=UserSchema)
@@ -114,7 +74,11 @@ async def post_one_user(user: UserCreate, db: Session = Depends(DBC.get_session)
 
 
 @router.put("/users", response_model=UserSchema)
-def put_one_user(user: UserUpdate, db: Session = Depends(DBC.get_session)):
+def put_one_user(
+    user: UserUpdate,
+    current_user: UserSchema = Depends(get_current_user),
+    db: Session = Depends(DBC.get_session),
+):
     """
     PUT one user
     It reads parameters from the request field and update finds the entry and update it
@@ -124,7 +88,7 @@ def put_one_user(user: UserUpdate, db: Session = Depends(DBC.get_session)):
     """
     try:
         # Get user by ID
-        user_to_put = db.query(UserModel).filter(UserModel.id == user.id).one()
+        user_to_put = db.query(UserModel).filter(UserModel.id == current_user.id).one()
 
         # Update model class variable for requested fields
         for var, value in vars(user).items():

@@ -11,10 +11,11 @@ from fastapi import Depends
 from src.settings import load_config
 from src.utils.common_logger import logger
 from src.utils.custom_error_handlers import ConfigError
-from src.logic.auth import OAuth2PasswordBearerCookie
 from src.utils.custom_error_handlers import AuthError
+from fastapi.security import OAuth2PasswordBearer
 
-oauth2_scheme = OAuth2PasswordBearerCookie(tokenUrl="/token")
+
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 
 
 class JWT_Handler:
