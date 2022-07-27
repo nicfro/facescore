@@ -61,31 +61,6 @@ async def get_current_user(
     )
 
 
-@router.get("/users", response_model=List[UserSchema])
-def get_all_users(
-    db: Session = Depends(DBC.get_session),
-):
-    """
-    GET all users
-    :param db: DB session
-    :return: ALl user entries
-    """
-    return [
-        {
-            "id": user.id,
-            "name": user.name,
-            "email": user.email,
-            "gender": user.gender,
-            "country": user.country,
-            "hashed_password": str(user.hashed_password),
-            "birthdate": user.birthdate,
-            "salt": user.salt,
-            "created_at": user.created_at,
-        }
-        for user in db.query(UserModel).all()
-    ]
-
-
 @router.get("/users/me/", response_model=UserSchema)
 async def get_me(current_user: UserSchema = Depends(get_current_user)):
     """
@@ -108,7 +83,7 @@ async def post_one_user(user: UserCreate, db: Session = Depends(DBC.get_session)
     """
     try:
         user_args = user.dict()
-        # Create hashed passwordxw
+        # Create hashed password
         user_args["hashed_password"], user_args["salt"] = hasher.user_hash(
             user.password
         )
@@ -181,10 +156,7 @@ def delete_one_user_by_id(
     db: Session = Depends(DBC.get_session),
 ):
     """
-    Fetches current user
-    It reads parameters from the request field, finds the entry and delete it
-    :param user_id: User ID to delete
-    :param db: DB session
+    Deletes current user
     :return: Deleted user entry
     """
     try:

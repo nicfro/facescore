@@ -4,10 +4,9 @@ import sys
 
 sys.path.insert(0, os.getcwd())
 
-import sqlalchemy
 from sqlalchemy.orm import Session
 from fastapi import Depends, APIRouter, HTTPException, status
-from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
+from fastapi.security import OAuth2PasswordRequestForm
 from src.orm_models.db_models import UserModel
 from src.schemas.token import TokenSchema
 from . import DBC
@@ -22,7 +21,7 @@ ACCESS_TOKEN_EXPIRE_SECONDS = int(os.environ.get("ACCESS_TOKEN_EXPIRE_SECONDS"))
 
 
 @router.get("/login", response_model=TokenSchema)
-def login_user(
+def login(
     form_data: OAuth2PasswordRequestForm = Depends(),
     db: Session = Depends(DBC.get_session),
 ):
