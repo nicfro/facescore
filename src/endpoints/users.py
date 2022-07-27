@@ -6,9 +6,10 @@ sys.path.insert(0, os.getcwd())
 from typing import List
 import sqlalchemy
 from sqlalchemy.orm import Session
-from fastapi import Depends, APIRouter
-
-from src.schemas.users import UserSchema, UserCreate, UserAuth, UserUpdate
+from fastapi import Depends, APIRouter, HTTPException, status
+from src.schemas.users import UserSchema, UserCreate, UserUpdate
+from src.schemas.token import TokenData
+from fastapi.security import OAuth2PasswordBearer
 from src.orm_models.db_models import UserModel
 from . import DBC
 from src.logic.hasher import Hasher
@@ -17,12 +18,51 @@ from src.logic.jwt_handler import JWT_Handler
 
 hasher = Hasher()
 router = APIRouter()
-JWT = JWT_Handler()
+JWT_test = JWT_Handler()
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
+
+
+async def get_current_user(
+    token: str = Depends(oauth2_scheme), db: Session = Depends(DBC.get_session)
+):
+    """
+    fetches current user using oauth2 validation
+    Query with header where
+    key is: Authorization
+    value is: bearer JWT_token
+    """
+    credentials_exception = HTTPException(
+        status_code=status.HTTP_401_UNAUTHORIZED,
+        detail="Could not validate credentials",
+        headers={"WWW-Authenticate": "Bearer"},
+    )
+    try:
+        user_id = JWT_test.decode_auth_token(token)["sub"]
+        if user_id is None:
+            raise credentials_exception
+        token_data = TokenData(user_id=user_id)
+    except:
+        raise credentials_exception
+
+    user = db.query(UserModel).filter(UserModel.id == token_data.user_id).one_or_none()
+    if user is None:
+        raise credentials_exception
+
+    return UserSchema(
+        id=user.id,
+        name=user.name,
+        email=user.email,
+        gender=user.gender,
+        country=user.country,
+        hashed_password=str(user.hashed_password),
+        birthdate=user.birthdate,
+        salt=user.salt,
+        created_at=user.created_at,
+    )
 
 
 @router.get("/users", response_model=List[UserSchema])
 def get_all_users(
-    user_auth: UserAuth = Depends(JWT.decode_auth_token),
     db: Session = Depends(DBC.get_session),
 ):
     """
@@ -46,60 +86,19 @@ def get_all_users(
     ]
 
 
-@router.get("/users/name/{user_name}", response_model=UserSchema)
-def get_one_user_by_name(user_name: str, db: Session = Depends(DBC.get_session)):
+@router.get("/users/me/", response_model=UserSchema)
+async def get_me(current_user: UserSchema = Depends(get_current_user)):
     """
-    GET one user by name
-    :param user_name: User name to get
+    GET current user given token
+    :param token: User token
     :param db: DB session
     :return: Retrieved user entry
     """
-    try:
-        # Get user by name
-        user = db.query(UserModel).filter(UserModel.name == user_name).one()
-        return {
-            "id": user.id,
-            "name": user.name,
-            "email": user.email,
-            "gender": user.gender,
-            "country": user.country,
-            "hashed_password": str(user.hashed_password),
-            "birthdate": user.birthdate,
-            "salt": user.salt,
-            "created_at": user.created_at,
-        }
-    except sqlalchemy.orm.exc.NoResultFound:
-        raise Exception(f"{user_name} does not exist")
-
-
-@router.get("/users/id/{user_id}", response_model=UserSchema)
-def get_one_user_by_id(user_id: str, db: Session = Depends(DBC.get_session)):
-    """
-    GET one user by ID
-    :param user_id: User ID to get
-    :param db: DB session
-    :return: Retrieved user entry
-    """
-    try:
-        # Get user by name
-        user = db.query(UserModel).filter(UserModel.id == user_id).one()
-        return {
-            "id": user.id,
-            "name": user.name,
-            "email": user.email,
-            "gender": user.gender,
-            "country": user.country,
-            "hashed_password": str(user.hashed_password),
-            "birthdate": user.birthdate,
-            "salt": user.salt,
-            "created_at": user.created_at,
-        }
-    except sqlalchemy.orm.exc.NoResultFound:
-        raise Exception(f"{user_id} does not exist")
+    return current_user
 
 
 @router.post("/users", response_model=UserSchema)
-def post_one_user(user: UserCreate, db: Session = Depends(DBC.get_session)):
+async def post_one_user(user: UserCreate, db: Session = Depends(DBC.get_session)):
     """
     POST one user
     It reads parameters from the request field and add missing fields from default values defined in the model
@@ -176,10 +175,13 @@ def put_one_user(user: UserUpdate, db: Session = Depends(DBC.get_session)):
         raise Exception(f"{user.id} does not exist")
 
 
-@router.delete("/users/id/{user_id}", response_model=UserAuth)
-def delete_one_user_by_id(user_id: str, db: Session = Depends(DBC.get_session)):
+@router.delete("/users/", response_model=UserSchema)
+def delete_one_user_by_id(
+    current_user: UserSchema = Depends(get_current_user),
+    db: Session = Depends(DBC.get_session),
+):
     """
-    DELETE one user by ID
+    Fetches current user
     It reads parameters from the request field, finds the entry and delete it
     :param user_id: User ID to delete
     :param db: DB session
@@ -187,11 +189,13 @@ def delete_one_user_by_id(user_id: str, db: Session = Depends(DBC.get_session)):
     """
     try:
         # Delete entry
-        affected_rows = db.query(UserModel).filter(UserModel.id == user_id).delete()
+        affected_rows = (
+            db.query(UserModel).filter(UserModel.id == current_user.id).delete()
+        )
         if not affected_rows:
             raise sqlalchemy.orm.exc.NoResultFound
         # Commit to DB
         db.commit()
-        return {"id": user_id}
+        return current_user
     except sqlalchemy.orm.exc.NoResultFound:
-        raise Exception(f"{user_id} does not exist")
+        raise Exception(f"{current_user.id} does not exist")
