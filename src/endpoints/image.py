@@ -69,10 +69,9 @@ async def post_image(
 @router.get("/images/votes", response_model=List[ImageSchema])
 async def get_image_for_vote(db: Session = Depends(DBC.get_session)):
     """
-    GET two images that are relatively close in score
-    :param image_id: identifier for the image to be returned
+    GET two images to vote on
     :param db: DB session
-    :return: image paths and users
+    :return: image paths and user ids
     """
 
     return [
