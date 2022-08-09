@@ -115,7 +115,7 @@ def put_one_user(
 
 
 @router.delete("/users/", response_model=UserSchema)
-def delete_one_user_by_id(
+def delete_current_user(
     current_user: UserSchema = Depends(get_current_user),
     db: Session = Depends(DBC.get_session),
 ):

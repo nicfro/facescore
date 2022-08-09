@@ -1,4 +1,8 @@
 # docker-compose.yml
+# docker compose build
+# docker-compose --env-file .ENV up -d
+# Getting into the container: docker exec -it facescore bash
+
 version: '2'
 services:
   facescore:
@@ -10,3 +14,29 @@ services:
       - "5000:5000"
     env_file:
       - .env
+    networks:
+      - ps-net
+  database:
+    container_name: "database"
+    image: postgres:14
+    restart: always
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - ps-net
+    environment:
+      - POSTGRES_USER=$DB_USER
+      - POSTGRES_PASSWORD=$DB_PASSWORD
+      - POSTGRES_NAME=$DB_NAME
+    volumes:
+      - db_volume:/var/lib/postgresql
+    ports:
+      - 5432:5432
+networks:
+  ps-net:
+    driver: bridge
+volumes:
+  db_volume: {}

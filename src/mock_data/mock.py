@@ -21,7 +21,6 @@ insert_images = ImageData()
 for user in insert_users.data:
     client.post("/users", json=user)
 
-
 form = {"user_id": "1", "gender": "female"}
 for image in insert_images.data:
     files = {"image": (f"{image}", open(image, "rb").read())}
@@ -29,4 +28,3 @@ for image in insert_images.data:
         "Content-Type": "multipart/form-data",
     }
     result = client.post("/images", params=form, files=files)
-
