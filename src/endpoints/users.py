@@ -41,7 +41,7 @@ async def post_one_user(user: UserCreate, db: Session = Depends(DBC.get_session)
     It reads parameters from the request field and add missing fields from default values defined in the model
     :param user: UserBase class that contains all columns in the table
     :param db: DB session
-    :return: Created user entry
+    :return: TokenSchema
     """
     try:
         user_args = user.dict()
