@@ -7,6 +7,7 @@ import sqlalchemy
 from sqlalchemy.orm import Session
 from fastapi import Depends, APIRouter
 from src.schemas.users import UserSchema, UserCreate, UserUpdate
+from src.schemas.token import TokenSchema
 from fastapi.security import OAuth2PasswordBearer
 from src.orm_models.db_models import UserModel
 from . import DBC
@@ -17,8 +18,9 @@ from src.logic.auth import get_current_user
 
 hasher = Hasher()
 router = APIRouter()
-JWT_test = JWT_Handler()
+jwt = JWT_Handler()
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
+ACCESS_TOKEN_EXPIRE_SECONDS = int(os.environ.get("ACCESS_TOKEN_EXPIRE_SECONDS"))
 
 
 @router.get("/users/me/", response_model=UserSchema)
@@ -32,7 +34,7 @@ async def get_me(current_user: UserSchema = Depends(get_current_user)):
     return current_user
 
 
-@router.post("/users", response_model=UserSchema)
+@router.post("/users", response_model=TokenSchema)
 async def post_one_user(user: UserCreate, db: Session = Depends(DBC.get_session)):
     """
     POST one user
@@ -53,21 +55,14 @@ async def post_one_user(user: UserCreate, db: Session = Depends(DBC.get_session)
         user_args["name"] = user_args["name"].lower()
         user = UserModel(**user_args)
 
-        # Commit to DB
         db.add(user)
+        # flush for fetching id
+        db.flush()
+        token = jwt.encode_auth_token(user.id, ACCESS_TOKEN_EXPIRE_SECONDS)
         db.commit()
         db.refresh(user)
-        return {
-            "id": user.id,
-            "name": user.name,
-            "email": user.email,
-            "gender": user.gender,
-            "country": user.country,
-            "hashed_password": str(user.hashed_password),
-            "birthdate": user.birthdate,
-            "salt": user.salt,
-            "created_at": user.created_at,
-        }
+
+        return {"access_token": token, "token_type": "bearer"}
 
     except sqlalchemy.exc.IntegrityError:
         raise Exception(f"Duplicate Email: {user.email} or Username: {user.name}")

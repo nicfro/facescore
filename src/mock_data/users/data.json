@@ -2,33 +2,21 @@
     {
         "name": "mads",
         "email": "Mads.anton@gmail.com",
-        "gender": "male",
-        "country": "den",
-        "password": "1234",
-        "birthdate": "2000-07-25"
+        "password": "1234"
     },
     {
         "name": "nicolai",
         "email": "nicolai.frost@gmail.com",
-        "gender": "male",
-        "country": "den",
-        "password": "1124001",
-        "birthdate": "1990-12-25"
+        "password": "1124001"
     },
     {
         "name": "palle",
         "email": "palle@hotmail.com",
-        "gender": "male",
-        "country": "den",
-        "password": "123",
-        "birthdate": "1980-06-25"
+        "password": "123"
     },
     {
         "name": "Børge",
         "email": "børge@gmail.com",
-        "gender": "male",
-        "country": "den",
-        "password": "123456",
-        "birthdate": "1998-08-20"
+        "password": "123456"
     }
 ]

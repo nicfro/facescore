@@ -16,7 +16,7 @@ from src.logic.jwt_handler import JWT_Handler
 
 hasher = Hasher()
 router = APIRouter()
-JWT = JWT_Handler()
+jwt = JWT_Handler()
 ACCESS_TOKEN_EXPIRE_SECONDS = int(os.environ.get("ACCESS_TOKEN_EXPIRE_SECONDS"))
 
 
@@ -41,7 +41,7 @@ def login(
     )
     if user:
         if hasher.verify(form_data.password, user.salt, str(user.hashed_password)):
-            token = JWT.encode_auth_token(user.id, ACCESS_TOKEN_EXPIRE_SECONDS)
+            token = jwt.encode_auth_token(user.id, ACCESS_TOKEN_EXPIRE_SECONDS)
             return {"access_token": token, "token_type": "bearer"}
         else:
             raise login_exception

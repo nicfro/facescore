@@ -31,10 +31,7 @@ class UserCreate(BaseModel):
 
     name: str
     email: str
-    gender: str
-    country: str
     password: str
-    birthdate: date
 
 
 class UserUpdate(BaseModel):
