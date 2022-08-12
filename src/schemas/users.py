@@ -39,5 +39,7 @@ class UserUpdate(BaseModel):
     Fields information needed for Update
     """
 
+    gender: Optional[str]
     email: Optional[str]
     country: Optional[str]
+    birthdate: Optional[date]
