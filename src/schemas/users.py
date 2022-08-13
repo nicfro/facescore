@@ -13,10 +13,10 @@ class UserSchema(BaseModel):
     id: int
     name: str
     email: str
-    gender: str
-    country: str
+    gender: Optional[str]
+    country: Optional[str]
     hashed_password: str
-    birthdate: date
+    birthdate: Optional[date]
     salt: str
     points: int
     created_at: datetime

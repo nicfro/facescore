@@ -9,6 +9,7 @@ from src.schemas.votes import VoteCreate
 from src.schemas.users import UserSchema
 from src.orm_models.db_models import VoteModel
 from src.orm_models.db_models import EloModel
+from src.orm_models.db_models import UserModel
 from src.logic.elo import calculateElo
 from . import DBC
 from src.logic.auth import get_current_user
@@ -58,7 +59,10 @@ def post_one_vote(
 
         elo_model_loser = EloModel(**elo_args_loser)
 
-        objects = [elo_model_winner, elo_model_loser, vote_to_create]
+        user = db.query(UserModel).filter(UserModel.id == current_user.id).one()
+        user.points += 1
+
+        objects = [elo_model_winner, elo_model_loser, vote_to_create, user]
         db.bulk_save_objects(objects)
 
         db.commit()
