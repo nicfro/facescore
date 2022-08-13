@@ -41,6 +41,5 @@ class UserUpdate(BaseModel):
     """
 
     gender: Optional[str]
-    email: Optional[str]
     country: Optional[str]
     birthdate: Optional[date]

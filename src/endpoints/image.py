@@ -5,14 +5,16 @@ sys.path.insert(0, os.getcwd())
 
 from typing import List
 import sqlalchemy
+from src.settings import load_config
 from sqlalchemy import func
 from sqlalchemy.orm import Session
-from fastapi import Depends, APIRouter, UploadFile, File
+from fastapi import Depends, APIRouter, UploadFile, File, HTTPException, status
 from src.schemas.images import ImageSchema
-from src.orm_models.db_models import ImageModel
+from src.schemas.users import UserSchema
+from src.orm_models.db_models import ImageModel, EloModel, UserModel
 from . import DBC, S3
-from src.orm_models.db_models import EloModel
 from src.logic.hasher import Hasher
+from src.logic.auth import get_current_user
 
 import base64
 
@@ -20,11 +22,15 @@ import base64
 hasher = Hasher()
 router = APIRouter()
 
+if os.path.isfile("ENV"):
+    load_config("ENV")
+
+POINTS_UPLOAD_COST = os.environ.get("POINTS_UPLOAD_COST")
+
 
 @router.post("/images")
 async def post_image(
-    gender: str,
-    user_id: int,
+    current_user: UserSchema = Depends(get_current_user),
     image: UploadFile = File(...),
     db: Session = Depends(DBC.get_session),
 ):
@@ -38,13 +44,19 @@ async def post_image(
     :return: Created image entry
     """
 
+    if current_user.points < 10:
+        return HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Not enough points for image upload",
+        )
+
     # Store image in S3
     image_file = image.file.read()
     image_file = base64.b64encode(image_file)
 
-    image_name = f"images/{gender}/{hasher.image_hash(image_file)}"
+    image_name = f"images/{current_user.gender}/{hasher.image_hash(image_file)}"
 
-    image_args = {"user_id": user_id, "file": image_name}
+    image_args = {"user_id": current_user.id, "file": image_name}
     image_model = ImageModel(**image_args)
     db.add(image_model)
     db.commit()
@@ -52,9 +64,13 @@ async def post_image(
     elo_args = {"image_id": image_model.id}
     elo_model = EloModel(**elo_args)
 
+    db.add(elo_model)
+    db.commit()
+
     S3_response = S3.upload_image(image_file, image_name)
 
-    db.add(elo_model)
+    user_to_put = db.query(UserModel).filter(UserModel.id == current_user.id).one()
+    user_to_put.points -= int(POINTS_UPLOAD_COST)
     db.commit()
 
     if S3_response["ResponseMetadata"]["HTTPStatusCode"] == 200:

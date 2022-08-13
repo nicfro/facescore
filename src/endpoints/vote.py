@@ -5,6 +5,7 @@ sys.path.insert(0, os.getcwd())
 
 from sqlalchemy.orm import Session
 from fastapi import Depends, APIRouter, HTTPException, status
+from src.settings import load_config
 from src.schemas.votes import VoteCreate
 from src.schemas.users import UserSchema
 from src.orm_models.db_models import VoteModel
@@ -15,6 +16,11 @@ from . import DBC
 from src.logic.auth import get_current_user
 
 router = APIRouter()
+
+if os.path.isfile("ENV"):
+    load_config("ENV")
+
+POINTS_VOTE_AWARD = os.environ.get("POINTS_VOTE_AWARD")
 
 
 @router.post("/votes", response_model=VoteCreate)
@@ -59,10 +65,9 @@ def post_one_vote(
 
         elo_model_loser = EloModel(**elo_args_loser)
 
-        user = db.query(UserModel).filter(UserModel.id == current_user.id).one()
-        user.points += 1
+        current_user.points += int(POINTS_VOTE_AWARD)
 
-        objects = [elo_model_winner, elo_model_loser, vote_to_create, user]
+        objects = [elo_model_winner, elo_model_loser, vote_to_create, current_user]
         db.bulk_save_objects(objects)
 
         db.commit()

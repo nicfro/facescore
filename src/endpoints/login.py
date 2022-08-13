@@ -37,7 +37,9 @@ def login(
         headers={"WWW-Authenticate": "Bearer"},
     )
     user = (
-        db.query(UserModel).filter(UserModel.name == form_data.username).one_or_none()
+        db.query(UserModel)
+        .filter(UserModel.name == form_data.username.lower())
+        .one_or_none()
     )
     if user:
         if hasher.verify(form_data.password, user.salt, str(user.hashed_password)):

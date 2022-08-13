@@ -1,9 +1,21 @@
+import os
+import sys
+
+sys.path.insert(0, os.getcwd())
+
+from src.settings import load_config
+
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy import Column, VARCHAR, TIMESTAMP, ForeignKey, Integer, Date, Float
 from sqlalchemy.sql import func
 
 
 BaseModel = declarative_base()
+
+if os.path.isfile("ENV"):
+    load_config("ENV")
+
+POINTS_START = os.environ.get("POINTS_START")
 
 
 class UserModel(BaseModel):
@@ -22,7 +34,7 @@ class UserModel(BaseModel):
     birthdate = Column(Date, index=True, nullable=True)
     hashed_password = Column(VARCHAR(length=255))
     salt = Column(VARCHAR(length=255))
-    points = Column(Integer, default=0)
+    points = Column(Integer, default=int(POINTS_START))
     created_at = Column(TIMESTAMP, default=func.now())
 
 

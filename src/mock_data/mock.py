@@ -1,5 +1,6 @@
 import os
 import sys
+import json
 
 sys.path.insert(0, os.getcwd())
 
@@ -15,16 +16,21 @@ DB.drop_and_create_tables()
 
 client = TestClient(app)
 
+# Create users from User mock data
 insert_users = UserData()
-insert_images = ImageData()
-
 for user in insert_users.data:
     client.post("/users", json=user)
 
-form = {"user_id": "1", "gender": "female"}
+# login with created user for JWT token & create header for future requests
+form = {"username": user["name"], "password": user["password"]}
+bearer = client.get("/login", data=form)
+token = json.loads(bearer.text)["access_token"]
+header = {"Authorization": f"bearer {token}"}
+
+
+# insert images from image mock data
+insert_images = ImageData()
+
 for image in insert_images.data:
     files = {"image": (f"{image}", open(image, "rb").read())}
-    header = {
-        "Content-Type": "multipart/form-data",
-    }
-    result = client.post("/images", params=form, files=files)
+    result = client.post("/images", headers=header, files=files)

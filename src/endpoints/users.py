@@ -20,7 +20,9 @@ hasher = Hasher()
 router = APIRouter()
 jwt = JWT_Handler()
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
+
 ACCESS_TOKEN_EXPIRE_SECONDS = int(os.environ.get("ACCESS_TOKEN_EXPIRE_SECONDS"))
+POINTS_USER_META_DATA_AWARD = int(os.environ.get("POINTS_USER_META_DATA_AWARD"))
 
 
 @router.get("/users/me/", response_model=UserSchema)
@@ -87,7 +89,12 @@ def put_one_user(
 
         # Update model class variable for requested fields
         for var, value in vars(user).items():
-            setattr(user_to_put, var, value) if value else getattr(user_to_put, var)
+            if value:
+                if getattr(user_to_put, var) is None:
+                    user_to_put.points += POINTS_USER_META_DATA_AWARD
+                setattr(user_to_put, var, value)
+            else:
+                getattr(user_to_put, var)
 
         # Commit to DB
         db.add(user_to_put)
@@ -102,6 +109,7 @@ def put_one_user(
             "hashed_password": str(user_to_put.hashed_password),
             "birthdate": user_to_put.birthdate,
             "salt": user_to_put.salt,
+            "points": user_to_put.points,
             "created_at": user_to_put.created_at,
         }
 
