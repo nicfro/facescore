@@ -22,6 +22,7 @@ class UserModel(BaseModel):
     birthdate = Column(Date, index=True, nullable=True)
     hashed_password = Column(VARCHAR(length=255))
     salt = Column(VARCHAR(length=255))
+    points = Column(Integer, default=0)
     created_at = Column(TIMESTAMP, default=func.now())
 
 

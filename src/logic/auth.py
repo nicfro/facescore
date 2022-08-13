@@ -53,5 +53,6 @@ async def get_current_user(
         hashed_password=str(user.hashed_password),
         birthdate=user.birthdate,
         salt=user.salt,
+        points=user.points,
         created_at=user.created_at,
     )

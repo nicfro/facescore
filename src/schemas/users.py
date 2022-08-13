@@ -18,6 +18,7 @@ class UserSchema(BaseModel):
     hashed_password: str
     birthdate: date
     salt: str
+    points: int
     created_at: datetime
 
     class Config:

@@ -1,5 +1,6 @@
 import os
 import sys
+
 sys.path.insert(0, os.getcwd())
 
 import sqlalchemy
@@ -21,16 +22,21 @@ def get_elo_by_image_id(image_id: int, db: Session = Depends(DBC.get_session)):
     :return: Elo score for image with image_id
     """
     try:
-        # Get user by name
-        elo = db.query(EloModel).filter(EloModel.image_id == image_id).order_by(EloModel.id.desc()).first()
-        return {"id": elo.id,
-                "image_id": elo.image_id,
-                "mu": elo.mu, 
-                "sigma": elo.sigma, 
-                "created_at": elo.created_at}
+        elo = (
+            db.query(EloModel)
+            .filter(EloModel.image_id == image_id)
+            .order_by(EloModel.id.desc())
+            .first()
+        )
+        return {
+            "id": elo.id,
+            "image_id": elo.image_id,
+            "mu": elo.mu,
+            "sigma": elo.sigma,
+            "created_at": elo.created_at,
+        }
     except sqlalchemy.orm.exc.NoResultFound:
         raise Exception(f"Elo score for image with image_id: {image_id} does not exist")
-
 
 
 @router.post("/elo")
