@@ -8,9 +8,7 @@ from fastapi import Depends, APIRouter, HTTPException, status
 from src.settings import load_config
 from src.schemas.votes import VoteCreate
 from src.schemas.users import UserSchema
-from src.orm_models.db_models import VoteModel
-from src.orm_models.db_models import EloModel
-from src.orm_models.db_models import UserModel
+from src.orm_models.db_models import VoteModel, EloModel
 from src.logic.elo import calculateElo
 from . import DBC
 from src.logic.auth import get_current_user

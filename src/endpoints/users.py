@@ -49,11 +49,12 @@ async def post_one_user(user: UserCreate, db: Session = Depends(DBC.get_session)
         user_args = user.dict()
         # Create hashed password
         user_args["hashed_password"], user_args["salt"] = hasher.user_hash(
-            user.password
+            user.password1
         )
 
         # Create User Model
-        del user_args["password"]
+        del user_args["password1"]
+        del user_args["password2"]
         user_args["name"] = user_args["name"].lower()
         user = UserModel(**user_args)
 

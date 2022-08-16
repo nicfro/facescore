@@ -1,11 +1,11 @@
 import os
 import sys
+import base64
+from typing import List
 
 sys.path.insert(0, os.getcwd())
 
-from typing import List
 import sqlalchemy
-from src.settings import load_config
 from sqlalchemy import func
 from sqlalchemy.orm import Session
 from fastapi import Depends, APIRouter, UploadFile, File, HTTPException, status
@@ -15,9 +15,7 @@ from src.orm_models.db_models import ImageModel, EloModel, UserModel
 from . import DBC, S3
 from src.logic.hasher import Hasher
 from src.logic.auth import get_current_user
-
-import base64
-
+from src.settings import load_config
 
 hasher = Hasher()
 router = APIRouter()
