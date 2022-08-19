@@ -1,7 +1,6 @@
 from pydantic import BaseModel, EmailStr, validator
-from typing import Optional
-from datetime import datetime
-from datetime import date
+from typing import Optional, List, Literal
+from datetime import datetime, date
 import re
 
 
@@ -21,6 +20,8 @@ class UserSchema(BaseModel):
     salt: str
     points: int
     created_at: datetime
+    embedding1: Optional[List]
+    embedding2: Optional[List]
 
     class Config:
         orm_mode = True
@@ -38,7 +39,7 @@ class UserCreate(BaseModel):
 
     @validator("password2")
     def passwords_match_and_legal(cls, v, values, **kwargs):
-        if "password1" in values and v != values["password1"]:
+        if v != values["password1"]:
             raise ValueError("passwords do not match")
         if len(v) < 8:
             raise ValueError("Make sure your password is at lest 8 letters")
@@ -58,3 +59,23 @@ class UserUpdate(BaseModel):
     gender: Optional[str]
     country: Optional[str]
     birthdate: Optional[date]
+
+
+class UserVerificationRequest(BaseModel):
+    """
+    Fields for verification request
+    """
+
+    image: str
+    gesture: Literal[
+        "peace", "call", "dislike", "ok", "like", "one", "stop inverted", "palm", "rock"
+    ]
+
+
+class UserVerificationResponse(BaseModel):
+    """
+    Fields for verification response
+    """
+
+    verified: bool
+    missing_embeddings: int

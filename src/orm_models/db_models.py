@@ -6,7 +6,16 @@ sys.path.insert(0, os.getcwd())
 from src.settings import load_config
 
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy import Column, VARCHAR, TIMESTAMP, ForeignKey, Integer, Date, Float
+from sqlalchemy import (
+    Column,
+    VARCHAR,
+    TIMESTAMP,
+    ForeignKey,
+    Integer,
+    Date,
+    Float,
+    ARRAY,
+)
 from sqlalchemy.sql import func
 
 
@@ -35,6 +44,8 @@ class UserModel(BaseModel):
     hashed_password = Column(VARCHAR(length=255))
     salt = Column(VARCHAR(length=255))
     points = Column(Integer, default=int(POINTS_START))
+    embedding_1 = Column(ARRAY(float, dimensions=512), nullable=True)
+    embedding_2 = Column(ARRAY(float, dimensions=512), nullable=True)
     created_at = Column(TIMESTAMP, default=func.now())
 
 

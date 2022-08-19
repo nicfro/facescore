@@ -1,12 +1,20 @@
 import os
 import sys
+import requests
+import json
 
 sys.path.insert(0, os.getcwd())
 
 import sqlalchemy
 from sqlalchemy.orm import Session
-from fastapi import Depends, APIRouter
-from src.schemas.users import UserSchema, UserCreate, UserUpdate
+from fastapi import Depends, APIRouter, UploadFile, File
+from src.schemas.users import (
+    UserSchema,
+    UserCreate,
+    UserUpdate,
+    UserVerificationRequest,
+    UserVerificationResponse,
+)
 from src.schemas.token import TokenSchema
 from fastapi.security import OAuth2PasswordBearer
 from src.orm_models.db_models import UserModel
@@ -14,6 +22,7 @@ from . import DBC
 from src.logic.hasher import Hasher
 from src.logic.jwt_handler import JWT_Handler
 from src.logic.auth import get_current_user
+from src.utils.custom_error_handlers import forbidden_exception
 
 
 hasher = Hasher()
@@ -23,12 +32,13 @@ oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 
 ACCESS_TOKEN_EXPIRE_SECONDS = int(os.environ.get("ACCESS_TOKEN_EXPIRE_SECONDS"))
 POINTS_USER_META_DATA_AWARD = int(os.environ.get("POINTS_USER_META_DATA_AWARD"))
+ML_ENDPOINT = os.environ.get("ML_ENDPOINT")
 
 
 @router.get("/users/me/", response_model=UserSchema)
 async def get_me(current_user: UserSchema = Depends(get_current_user)):
     """
-    GET current user given token
+    GET current user from token
     :param token: User token
     :param db: DB session
     :return: Retrieved user entry
@@ -45,19 +55,17 @@ async def post_one_user(user: UserCreate, db: Session = Depends(DBC.get_session)
     :param db: DB session
     :return: TokenSchema
     """
+
+    user_args = user.dict()
+    # Create hashed password
+    user_args["hashed_password"], user_args["salt"] = hasher.user_hash(user.password1)
+
+    # Create User Model
+    del user_args["password1"]
+    del user_args["password2"]
+    user_args["name"] = user_args["name"].lower()
+    user = UserModel(**user_args)
     try:
-        user_args = user.dict()
-        # Create hashed password
-        user_args["hashed_password"], user_args["salt"] = hasher.user_hash(
-            user.password1
-        )
-
-        # Create User Model
-        del user_args["password1"]
-        del user_args["password2"]
-        user_args["name"] = user_args["name"].lower()
-        user = UserModel(**user_args)
-
         db.add(user)
         # flush for fetching id
         db.flush()
@@ -69,6 +77,31 @@ async def post_one_user(user: UserCreate, db: Session = Depends(DBC.get_session)
 
     except sqlalchemy.exc.IntegrityError:
         raise Exception(f"Duplicate Email: {user.email} or Username: {user.name}")
+
+
+@router.post("/users/verify/", response_model=UserVerificationResponse)
+async def verify_user(
+    user_verification: UserVerificationRequest,
+    current_user: UserSchema = Depends(get_current_user),
+    db: Session = Depends(DBC.get_session),
+):
+
+    headers = {"Content-type": "application/json", "Accept": "text/plain"}
+    payload = json.dumps({"image": user_verification.image, "gesture": "ok"})
+
+    response = requests.post(ML_ENDPOINT, data=payload, headers=headers)
+    data = response.json()
+    if current_user.embedding1 is None:
+        current_user.embedding1 = data["embedding"]
+        db.commit()
+        return UserVerificationResponse(verified=False, missing_embeddings=1)
+
+    if current_user.embedding2 is None:
+        current_user.embedding2 = data["embedding"]
+        db.commit()
+        return UserVerificationResponse(verified=True, missing_embeddings=0)
+
+    return forbidden_exception("User is already verified")
 
 
 @router.put("/users", response_model=UserSchema)
