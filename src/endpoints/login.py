@@ -20,7 +20,7 @@ jwt = JWT_Handler()
 ACCESS_TOKEN_EXPIRE_SECONDS = int(os.environ.get("ACCESS_TOKEN_EXPIRE_SECONDS"))
 
 
-@router.get("/login", response_model=TokenSchema)
+@router.post("/login", response_model=TokenSchema)
 def login(
     form_data: OAuth2PasswordRequestForm = Depends(),
     db: Session = Depends(DBC.get_session),
