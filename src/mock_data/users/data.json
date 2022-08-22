@@ -2,21 +2,25 @@
     {
         "name": "mads",
         "email": "Mads.anton@gmail.com",
-        "password": "1234"
+        "password1": "12345678Hehe",
+        "password2": "12345678Hehe"
     },
     {
         "name": "nicolai",
         "email": "nicolai.frost@gmail.com",
-        "password": "1124001"
+        "password1": "12345678Hehe",
+        "password2": "12345678Hehe"
     },
     {
         "name": "palle",
         "email": "palle@hotmail.com",
-        "password": "123"
+        "password1": "12345678Hehe",
+        "password2": "12345678Hehe"
     },
     {
         "name": "Børge",
         "email": "børge@gmail.com",
-        "password": "123456"
+        "password1": "12345678Hehe",
+        "password2": "12345678Hehe"
     }
 ]

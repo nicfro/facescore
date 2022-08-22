@@ -1,7 +1,7 @@
 import os
 import sys
 import base64
-from typing import List
+from typing import List, Tuple
 
 sys.path.insert(0, os.getcwd())
 
@@ -11,10 +11,10 @@ from sqlalchemy.orm import Session
 from fastapi import Depends, APIRouter, UploadFile, File, HTTPException, status
 from src.schemas.images import ImageSchema
 from src.schemas.users import UserSchema
-from src.orm_models.db_models import ImageModel, EloModel, UserModel
+from src.orm_models.db_models import ImageModel, EloModel
 from . import DBC, S3
 from src.logic.hasher import Hasher
-from src.logic.auth import get_current_user
+from src.logic.auth import get_current_user_db
 from src.settings import load_config
 
 hasher = Hasher()
@@ -26,11 +26,18 @@ if os.path.isfile("ENV"):
 POINTS_UPLOAD_COST = os.environ.get("POINTS_UPLOAD_COST")
 
 
+def forbidden_exception(reason):
+    return HTTPException(
+        status_code=status.HTTP_403_FORBIDDEN,
+        detail=f"{reason}",
+        headers={"WWW-Authenticate": "Bearer"},
+    )
+
+
 @router.post("/images")
 async def post_image(
-    current_user: UserSchema = Depends(get_current_user),
+    current_user_db: Tuple[UserSchema, Session] = Depends(get_current_user_db),
     image: UploadFile = File(...),
-    db: Session = Depends(DBC.get_session),
 ):
 
     """
@@ -41,12 +48,9 @@ async def post_image(
     :param db: DB session
     :return: Created image entry
     """
-
+    current_user, db = current_user_db
     if current_user.points < 10:
-        return HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Not enough points for image upload",
-        )
+        return forbidden_exception("Not enough points for image upload")
 
     # Store image in S3
     image_file = image.file.read()
@@ -67,8 +71,7 @@ async def post_image(
 
     S3_response = S3.upload_image(image_file, image_name)
 
-    user_to_put = db.query(UserModel).filter(UserModel.id == current_user.id).one()
-    user_to_put.points -= int(POINTS_UPLOAD_COST)
+    current_user.points += int(POINTS_UPLOAD_COST)
     db.commit()
 
     if S3_response["ResponseMetadata"]["HTTPStatusCode"] == 200:
@@ -81,7 +84,7 @@ async def post_image(
 
 
 @router.get("/images/votes", response_model=List[ImageSchema])
-async def get_image_for_vote(db: Session = Depends(DBC.get_session)):
+async def get_images_for_vote(db: Session = Depends(DBC.get_session)):
     """
     GET two images to vote on
     :param db: DB session

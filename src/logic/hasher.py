@@ -7,6 +7,7 @@ class Hasher:
         self.SALT_ALPHABET = (
             "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
         )
+
         self.hasher = hashlib.new("sha256")
 
     def verify(self, password, salt, hashed_password) -> bool:

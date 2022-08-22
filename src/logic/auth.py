@@ -18,7 +18,7 @@ JWT_test = JWT_Handler()
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 
 
-async def get_current_user(
+async def get_current_user_db(
     token: str = Depends(oauth2_scheme), db: Session = Depends(DBC.get_session)
 ):
     """
@@ -41,8 +41,11 @@ async def get_current_user(
         raise credentials_exception
 
     user = db.query(UserModel).filter(UserModel.id == token_data.user_id).one_or_none()
+
     if user is None:
         raise credentials_exception
+
+    return user, db
 
     return UserSchema(
         id=user.id,
@@ -55,4 +58,7 @@ async def get_current_user(
         salt=user.salt,
         points=user.points,
         created_at=user.created_at,
+        embedding_1=user.embedding_1,
+        embedding_2=user.embedding_2,
+        verified=user.verified,
     )

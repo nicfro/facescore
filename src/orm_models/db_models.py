@@ -7,6 +7,7 @@ from src.settings import load_config
 
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy import (
+    Boolean,
     Column,
     VARCHAR,
     TIMESTAMP,
@@ -44,8 +45,9 @@ class UserModel(BaseModel):
     hashed_password = Column(VARCHAR(length=255))
     salt = Column(VARCHAR(length=255))
     points = Column(Integer, default=int(POINTS_START))
-    embedding_1 = Column(ARRAY(float, dimensions=512), nullable=True)
-    embedding_2 = Column(ARRAY(float, dimensions=512), nullable=True)
+    embedding1 = Column(ARRAY(Float, dimensions=1), nullable=True)
+    embedding2 = Column(ARRAY(Float, dimensions=1), nullable=True)
+    verified = Column(Boolean, default=False)
     created_at = Column(TIMESTAMP, default=func.now())
 
 

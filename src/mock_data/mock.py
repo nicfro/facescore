@@ -22,8 +22,8 @@ for user in insert_users.data:
     client.post("/users", json=user)
 
 # login with created user for JWT token & create header for future requests
-form = {"username": user["name"], "password": user["password"]}
-bearer = client.get("/login", data=form)
+form = {"username": user["name"], "password": user["password1"]}
+bearer = client.post("/login", data=form)
 token = json.loads(bearer.text)["access_token"]
 header = {"Authorization": f"bearer {token}"}
 

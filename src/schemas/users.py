@@ -22,6 +22,7 @@ class UserSchema(BaseModel):
     created_at: datetime
     embedding1: Optional[List]
     embedding2: Optional[List]
+    verified: Optional[bool]
 
     class Config:
         orm_mode = True

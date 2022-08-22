@@ -2,12 +2,13 @@ import os
 import sys
 import requests
 import json
+from typing import Tuple
 
 sys.path.insert(0, os.getcwd())
 
 import sqlalchemy
 from sqlalchemy.orm import Session
-from fastapi import Depends, APIRouter, UploadFile, File
+from fastapi import Depends, APIRouter
 from src.schemas.users import (
     UserSchema,
     UserCreate,
@@ -21,7 +22,7 @@ from src.orm_models.db_models import UserModel
 from . import DBC
 from src.logic.hasher import Hasher
 from src.logic.jwt_handler import JWT_Handler
-from src.logic.auth import get_current_user
+from src.logic.auth import get_current_user_db
 from src.utils.custom_error_handlers import forbidden_exception
 
 
@@ -36,14 +37,16 @@ ML_ENDPOINT = os.environ.get("ML_ENDPOINT")
 
 
 @router.get("/users/me/", response_model=UserSchema)
-async def get_me(current_user: UserSchema = Depends(get_current_user)):
+async def get_me(
+    current_user_db: Tuple[UserSchema, Session] = Depends(get_current_user_db)
+):
     """
     GET current user from token
     :param token: User token
     :param db: DB session
     :return: Retrieved user entry
     """
-    return current_user
+    return current_user_db[0]
 
 
 @router.post("/users", response_model=TokenSchema)
@@ -82,33 +85,36 @@ async def post_one_user(user: UserCreate, db: Session = Depends(DBC.get_session)
 @router.post("/users/verify/", response_model=UserVerificationResponse)
 async def verify_user(
     user_verification: UserVerificationRequest,
-    current_user: UserSchema = Depends(get_current_user),
-    db: Session = Depends(DBC.get_session),
+    current_user_db: Tuple[UserSchema, Session] = Depends(get_current_user_db),
 ):
-
+    current_user, db = current_user_db
     headers = {"Content-type": "application/json", "Accept": "text/plain"}
-    payload = json.dumps({"image": user_verification.image, "gesture": "ok"})
+    payload = json.dumps(
+        {"image": user_verification.image, "gesture": user_verification.gesture}
+    )
 
     response = requests.post(ML_ENDPOINT, data=payload, headers=headers)
-    data = response.json()
-    if current_user.embedding1 is None:
-        current_user.embedding1 = data["embedding"]
-        db.commit()
-        return UserVerificationResponse(verified=False, missing_embeddings=1)
+    if response.status_code == 200:
+        data = response.json()
+        if current_user.embedding1 is None:
+            current_user.embedding1 = data["embedding"]
+            db.commit()
+            return UserVerificationResponse(verified=False, missing_embeddings=1)
+        elif current_user.embedding2 is None:
+            current_user.embedding2 = data["embedding"]
+            db.commit()
+            return UserVerificationResponse(verified=True, missing_embeddings=0)
+        else:
+            raise forbidden_exception("User is already verified")
 
-    if current_user.embedding2 is None:
-        current_user.embedding2 = data["embedding"]
-        db.commit()
-        return UserVerificationResponse(verified=True, missing_embeddings=0)
-
-    return forbidden_exception("User is already verified")
+    else:
+        raise forbidden_exception(response.json()["detail"])
 
 
 @router.put("/users", response_model=UserSchema)
 def put_one_user(
-    user: UserUpdate,
-    current_user: UserSchema = Depends(get_current_user),
-    db: Session = Depends(DBC.get_session),
+    user_update: UserUpdate,
+    current_user_db: Tuple[UserSchema, Session] = Depends(get_current_user_db),
 ):
     """
     PUT one user
@@ -117,58 +123,33 @@ def put_one_user(
     :param db: DB session
     :return: Updated user entry
     """
-    try:
-        # Get user by ID
-        user_to_put = db.query(UserModel).filter(UserModel.id == current_user.id).one()
+    current_user, db = current_user_db
 
-        # Update model class variable for requested fields
-        for var, value in vars(user).items():
-            if value:
-                if getattr(user_to_put, var) is None:
-                    user_to_put.points += POINTS_USER_META_DATA_AWARD
-                setattr(user_to_put, var, value)
-            else:
-                getattr(user_to_put, var)
+    # Update model class variable for requested fields
+    for var, value in vars(user_update).items():
+        if value:
+            if getattr(current_user, var) is None:
+                current_user.points += POINTS_USER_META_DATA_AWARD
+            setattr(current_user, var, value)
+        else:
+            getattr(current_user, var)
 
-        # Commit to DB
-        db.add(user_to_put)
-        db.commit()
-        db.refresh(user_to_put)
-        return {
-            "id": user_to_put.id,
-            "name": user_to_put.name,
-            "email": user_to_put.email,
-            "gender": user_to_put.gender,
-            "country": user_to_put.country,
-            "hashed_password": str(user_to_put.hashed_password),
-            "birthdate": user_to_put.birthdate,
-            "salt": user_to_put.salt,
-            "points": user_to_put.points,
-            "created_at": user_to_put.created_at,
-        }
-
-    except sqlalchemy.orm.exc.NoResultFound:
-        raise Exception(f"{user.id} does not exist")
+    # Commit to DB
+    db.add(current_user)
+    db.commit()
+    db.refresh(current_user)
+    return current_user
 
 
 @router.delete("/users/", response_model=UserSchema)
 def delete_current_user(
-    current_user: UserSchema = Depends(get_current_user),
-    db: Session = Depends(DBC.get_session),
+    current_user_db: Tuple[UserSchema, Session] = Depends(get_current_user_db),
 ):
     """
     Deletes current user
     :return: Deleted user entry
     """
-    try:
-        # Delete entry
-        affected_rows = (
-            db.query(UserModel).filter(UserModel.id == current_user.id).delete()
-        )
-        if not affected_rows:
-            raise sqlalchemy.orm.exc.NoResultFound
-        # Commit to DB
-        db.commit()
-        return current_user
-    except sqlalchemy.orm.exc.NoResultFound:
-        raise Exception(f"{current_user.id} does not exist")
+    current_user, db = current_user_db
+    db.delete(current_user)
+    db.commit()
+    return current_user

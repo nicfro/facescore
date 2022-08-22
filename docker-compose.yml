@@ -5,38 +5,20 @@
 
 version: '2'
 services:
-  facescore:
-    build:
-      context: .
-    container_name: "facescore"
-    restart: always
-    ports:
-      - "5000:5000"
-    env_file:
-      - .env
-    networks:
-      - ps-net
   database:
-    container_name: "database"
     image: postgres:14
+    ports:
+      - 5432:5432
     restart: always
-    healthcheck:
-      test: [ "CMD-SHELL", "pg_isready" ]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-    networks:
-      - ps-net
     environment:
       - POSTGRES_USER=$DB_USER
       - POSTGRES_PASSWORD=$DB_PASSWORD
-      - POSTGRES_NAME=$DB_NAME
-    volumes:
-      - db_volume:/var/lib/postgresql
+      - POSTGRES_DB=$DB_NAME
+    container_name: "database"
+  adminer:
+    image: adminer
+    restart: always
+    depends_on:
+      - database
     ports:
-      - 5432:5432
-networks:
-  ps-net:
-    driver: bridge
-volumes:
-  db_volume: {}
+      - 8080:8080

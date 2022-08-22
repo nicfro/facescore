@@ -1,5 +1,6 @@
 import os
 import sys
+from typing import Tuple
 
 sys.path.insert(0, os.getcwd())
 
@@ -11,7 +12,7 @@ from src.schemas.users import UserSchema
 from src.orm_models.db_models import VoteModel, EloModel
 from src.logic.elo import calculateElo
 from . import DBC
-from src.logic.auth import get_current_user
+from src.logic.auth import get_current_user_db
 
 router = APIRouter()
 
@@ -24,8 +25,7 @@ POINTS_VOTE_AWARD = os.environ.get("POINTS_VOTE_AWARD")
 @router.post("/votes", response_model=VoteCreate)
 def post_one_vote(
     vote: VoteCreate,
-    current_user: UserSchema = Depends(get_current_user),
-    db: Session = Depends(DBC.get_session),
+    current_user_db: Tuple[UserSchema, Session] = Depends(get_current_user_db),
 ):
     """
     POST one vote
@@ -33,6 +33,7 @@ def post_one_vote(
     :param vote: VoteBase class that contains winner/loser image ID
     :return: Created vote entry
     """
+    current_user, db = current_user_db
     try:
         payload = {
             "user_id": current_user.id,
