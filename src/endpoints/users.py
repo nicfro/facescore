@@ -74,8 +74,6 @@ async def post_one_user(user: UserCreate, db: Session = Depends(DBC.get_session)
         db.flush()
         token = jwt.encode_auth_token(user.id, ACCESS_TOKEN_EXPIRE_SECONDS)
         db.commit()
-        db.refresh(user)
-
         return {"access_token": token, "token_type": "bearer"}
 
     except sqlalchemy.exc.IntegrityError:
@@ -83,17 +81,20 @@ async def post_one_user(user: UserCreate, db: Session = Depends(DBC.get_session)
 
 
 @router.post("/users/verify/", response_model=UserVerificationResponse)
-async def verify_user(
+def verify_user(
     user_verification: UserVerificationRequest,
     current_user_db: Tuple[UserSchema, Session] = Depends(get_current_user_db),
 ):
     current_user, db = current_user_db
+
     headers = {"Content-type": "application/json", "Accept": "text/plain"}
     payload = json.dumps(
         {"image": user_verification.image, "gesture": user_verification.gesture}
     )
+    response = requests.post(
+        ML_ENDPOINT + "detections/gestures", data=payload, headers=headers
+    )
 
-    response = requests.post(ML_ENDPOINT, data=payload, headers=headers)
     if response.status_code == 200:
         data = response.json()
         if current_user.embedding1 is None:
@@ -102,6 +103,7 @@ async def verify_user(
             return UserVerificationResponse(verified=False, missing_embeddings=1)
         elif current_user.embedding2 is None:
             current_user.embedding2 = data["embedding"]
+            current_user.verified = True
             db.commit()
             return UserVerificationResponse(verified=True, missing_embeddings=0)
         else:
@@ -134,10 +136,7 @@ def put_one_user(
         else:
             getattr(current_user, var)
 
-    # Commit to DB
-    db.add(current_user)
     db.commit()
-    db.refresh(current_user)
     return current_user
 
 

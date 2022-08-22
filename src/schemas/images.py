@@ -18,13 +18,22 @@ class ImageSchema(BaseModel):
         orm_mode = True
 
 
-class ImageCreate(BaseModel):
+class ImageCreateRequest(BaseModel):
     """
     Fields information needed for POST
     """
 
-    user_id: int
-    file: str
+    image: str
+
+
+class ImageCreateResponse(BaseModel):
+    """
+    Fields information needed for POST
+    """
+
+    image_id: int
+    elo_mu: float
+    elo_sigma: float
 
 
 class ImageUpdate(BaseModel):

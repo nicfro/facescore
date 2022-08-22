@@ -13,7 +13,7 @@ from src.database.base import DBConnector
 
 DB = DBConnector()
 DB.drop_and_create_tables()
-
+"""
 client = TestClient(app)
 
 # Create users from User mock data
@@ -31,6 +31,14 @@ header = {"Authorization": f"bearer {token}"}
 # insert images from image mock data
 insert_images = ImageData()
 
+payload = json.dumps({"image": insert_images.verify1, "gesture": "ok"})
+response = client.post("/users/verify/", data=payload, headers=header)
+
+# payload = json.dumps({"image": insert_images.verify2, "gesture": "peace"})
+# response = client.post("/users/verify/", data=payload, headers=header)
+
 for image in insert_images.data:
-    files = {"image": (f"{image}", open(image, "rb").read())}
-    result = client.post("/images", headers=header, files=files)
+    payload = json.dumps({"image": image})
+    result = client.post("/images", headers=header, data=payload)
+
+"""
