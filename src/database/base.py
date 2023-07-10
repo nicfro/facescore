@@ -39,7 +39,6 @@ class DBConnector:
             os.environ.get("DB_PORT"),
             os.environ.get("DB_NAME"),
         ]:
-
             logger.error("Could not retrieve DB config")
             raise ConfigError("Could not retrieve DB config")
 

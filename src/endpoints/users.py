@@ -38,7 +38,7 @@ ML_ENDPOINT = os.environ.get("ML_ENDPOINT")
 
 @router.get("/users/me/", response_model=UserSchema)
 async def get_me(
-    current_user_db: Tuple[UserSchema, Session] = Depends(get_current_user_db)
+    current_user: Tuple[UserSchema, Session] = Depends(get_current_user_db)
 ):
     """
     GET current user from token
@@ -46,7 +46,7 @@ async def get_me(
     :param db: DB session
     :return: Retrieved user entry
     """
-    return current_user_db[0]
+    return current_user[0]
 
 
 @router.post("/users", response_model=TokenSchema)

@@ -45,20 +45,23 @@ async def get_current_user_db(
     if user is None:
         raise credentials_exception
 
-    return user, db
+    # return user, db
 
-    return UserSchema(
-        id=user.id,
-        name=user.name,
-        email=user.email,
-        gender=user.gender,
-        country=user.country,
-        hashed_password=str(user.hashed_password),
-        birthdate=user.birthdate,
-        salt=user.salt,
-        points=user.points,
-        created_at=user.created_at,
-        embedding_1=user.embedding_1,
-        embedding_2=user.embedding_2,
-        verified=user.verified,
+    return (
+        UserSchema(
+            id=user.id,
+            name=user.name,
+            email=user.email,
+            gender=user.gender,
+            country=user.country,
+            hashed_password=str(user.hashed_password),
+            birthdate=user.birthdate,
+            salt=user.salt,
+            points=user.points,
+            created_at=user.created_at,
+            embedding_1=user.embedding_1,
+            embedding_2=user.embedding_2,
+            verified=user.verified,
+        ),
+        db,
     )
